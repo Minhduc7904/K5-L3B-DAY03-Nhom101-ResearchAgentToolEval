@@ -28,7 +28,7 @@ Giao diện web gồm một máy chủ Python (`starter_v0/server.py`) và trang
 cd starter_v0
 pip install -r requirements.txt
 (cd web && npm install && npm run build)   # chỉ cần chạy một lần, hoặc sau khi sửa giao diện
-python server.py --provider gemini --version v3
+python server.py --provider openai --version v3   # chuỗi v0–v3 của nhóm chạy trên OpenAI gpt-4o-mini; có thể đổi sang --provider gemini
 ```
 
 Mở http://localhost:8000. Mỗi phiên chat được tự lưu thành file trong `starter_v0/transcripts/`.
@@ -37,7 +37,7 @@ Mở http://localhost:8000. Mỗi phiên chat được tự lưu thành file tro
 
 > Dán link public để team khác mở thử ngay. Cách deploy nhanh bằng Cloudflare Tunnel xem README. Nếu deploy Vercel/Streamlit Cloud thì dán link đó.
 >
-> URL: (dán link khi demo)
+> URL: https://unless-votes-pairs-bidding.trycloudflare.com  *(link tạm thời của Cloudflare Tunnel, chỉ hoạt động khi máy chạy `server.py` và `cloudflared` còn bật; mỗi lần chạy lại sẽ ra link mới)*
 
 Cách mở link cho team khác: khi máy chủ đang chạy, mở terminal khác và chạy `cloudflared tunnel --url http://localhost:8000`, rồi gửi link `trycloudflare.com` được in ra.
 
@@ -71,9 +71,19 @@ Cách mở link cho team khác: khi máy chủ đang chạy, mở terminal khác
 
 ## 3. Giải pháp
 
-> Tóm tắt các thay đổi chính trong `starter_v0/artifacts/system_prompt.md` và `starter_v0/artifacts/tools.yaml`, và tool mới nhóm viết (tên, làm gì, khi nào agent nên gọi).
+Chuỗi v0–v3 chạy trên **OpenAI gpt-4o-mini**, bộ base 20 case (`data/eval_base.json`); bộ group 10 case (`data/eval_group.json`) dùng để kiểm tra chéo.
 
--
+**`system_prompt.md`**
+- v0 (starter) cố ý có ba chỉ dẫn xấu: đoán khi thiếu thông tin, gửi ngay khi được nhờ, ép làm trong một bước. Kết quả 13/20 (0.65), 7 case FAIL (xem B2).
+- v1: bỏ ba chỉ dẫn xấu, thêm rule gọi `clarify` khi thiếu thông tin và xin xác nhận trước `send`. Kết quả 15/20 (0.75).
+- v3: thêm rule điền `query` (giữ từ khóa gốc, không đưa "news"/thời gian vào `query`), luồng xác nhận `send` (hỏi `yes_no`, gửi `confirmed=true` sau khi user xác nhận rõ, hủy thì không gửi), và trả lời thẳng khi ngoài phạm vi. Kết quả base 19/20 (0.95), group 9/10 (0.90). Thay đổi gộp nhiều phần nên không quy được điểm cho từng rule riêng (xem B1).
+
+**`tools.yaml`**
+- v2 (Nam viết): viết lại mô tả các tool kèm "dùng khi / không dùng khi", quy ước tham số (`response_type`, handle không có `@`, `topic=news`, `timeframe`, `search_type`) và ranh giới xác nhận của `send` (`confirmed=true` chỉ khi user đã đồng ý). Kết quả base 19/20 (0.95).
+
+**Tool mới: `artifact`** (Quang viết, `tools/artifact/`): biến câu trả lời thành một trang HTML tương tác (bảng lọc được, biểu đồ, máy tính nhỏ) hiện ngay trong khung chat. Agent nên gọi khi user đòi trang/biểu đồ/bảng tương tác hoặc khi dữ liệu có nhiều cột cần so sánh trực quan; không gọi cho câu trả lời ngắn bằng chữ. Có 7 unit test, 4 case eval nhóm (G04, G08, G05, G10) và hiển thị trong UI web.
+
+**Eval nhóm:** 10 case (5 single + 5 multi turn) trong `data/eval_group.json` đo thêm các điểm bộ base chưa phủ: luồng hỏi → xác nhận → gửi, hủy gửi, bỏ `@` ở handle, `timeframe=month`, chuyển tool giữa chừng và tool `artifact`.
 
 ## 4. Kết quả — PHẦN B: Chi tiết và bằng chứng
 
@@ -197,7 +207,26 @@ Hai phiên chat thật qua giao diện web (Gemini `gemini-3.8-flash`, prompt v3
 | Phiên 2, lượt 1 (yêu cầu gửi) | Tìm 3 tin AI nổi bật hôm nay rồi đăng lên Telegram giúp mình | `clarify(response_type="yes_no")` | như trên | Agent hỏi xác nhận, chưa gửi |
 | Phiên 2, lượt 2 (xác nhận) | có | `lookup` → `send(confirmed=true)` | như trên | `status: sent`, tin hiện trên kênh Telegram private của nhóm |
 
-Nhận xét: ở phiên 2, agent hỏi xác nhận trước khi tìm tin, nên người dùng đồng ý khi chưa thấy nội dung. Luồng vẫn đúng yêu cầu (hỏi → đồng ý → gửi), nhưng tốt hơn là cho người dùng xem nội dung trước rồi mới hỏi.
+**Ba phiên chat thật trên chuỗi chính thức (OpenAI gpt-4o-mini, prompt v3 `718f89bc937b`, tools `198864b46581`, `v3+p718f89bc937b+t198864b46581`)**, chạy qua link Cloudflare Tunnel:
+
+- Phiên A: `starter_v0/transcripts/v3_openai_web_20261110T191013015667.transcript.json`
+- Phiên B: `starter_v0/transcripts/v3_openai_web_20261110T191400882629.transcript.json`
+- Phiên C: `starter_v0/transcripts/v3_openai_web_20261110T191448500175.transcript.json`
+
+| Turn | User Request | Tool Calls | Version Evidence | Outcome |
+|---|---|---|---|---|
+| A, lượt 1 (yêu cầu thường) | Tin tức AI hôm nay có gì nổi bật? | `lookup(query="AI", topic="news", timeframe="day")` | v3 / OpenAI | Đúng tool, đúng tham số. Câu trả lời bằng tiếng Anh dù user hỏi tiếng Việt |
+| A, lượt 2 (yêu cầu gửi) | Gửi dòng này lên Telegram: "Họp 9h sáng mai" | `clarify` hỏi xác nhận | như trên | Agent không gửi ngay mà xin xác nhận (`waiting_for_user`) |
+| A, lượt 3 | không | không gọi tool | như trên | Agent dừng, không gửi |
+| A, lượt 4 | gửi các tin tức AI trên qua telegram | không gọi tool (hỏi xác nhận bằng văn bản thường) | như trên | Hỏi xác nhận đúng ý nhưng không dùng tool `clarify` nên giao diện không đánh dấu "đang chờ" |
+| A, lượt 5 (xác nhận) | ok | `send(confirmed=true)` | như trên | Đúng luồng, nhưng `send` trả lỗi `RuntimeError: Missing TELEGRAM_BOT_TOKEN…` vì máy chạy phiên này chưa cấu hình Telegram. Agent báo lỗi cho người dùng, không bịa là đã gửi. Bằng chứng `status: sent` nằm ở phiên Gemini phía trên |
+| A, lượt 6 | chuyển sang html | `artifact(title="Tin tức AI hôm nay", html=…)` | như trên | `status: rendered`, trang hiện trong khung chat |
+| B, lượt 1 | Tweet mới nhất của Sam Altman là gì? | `timeline(screenname="sama", limit=1)` | như trên | Đúng tool, đúng handle |
+| B, lượt 2 | oke thế tweet cũ hơn thì sao | `timeline(screenname="sama", limit=5)` | như trên | Gọi lại cùng tool với `limit=5`; tool không hỗ trợ phân trang nên không thật sự lấy được "cũ hơn" (giới hạn của tool) |
+| C, lượt 1 (thiếu thông tin) | Tóm tắt bài viết này hộ mình | không gọi tool (hỏi URL bằng văn bản thường) | như trên | Không đoán URL, hỏi lại; nhưng không dùng tool `clarify` |
+| C, lượt 2 (bổ sung) | https://aipure.ai/vn/articles/how-to-create-viral-talking-baby-podcast… | `fetch(url=…)` → `format(template="sections")` | như trên | Đọc bài và tóm tắt đúng |
+
+Nhận xét: ở phiên 2 (Gemini), agent hỏi xác nhận trước khi tìm tin, nên người dùng đồng ý khi chưa thấy nội dung. Luồng vẫn đúng yêu cầu (hỏi → đồng ý → gửi), nhưng tốt hơn là cho người dùng xem nội dung trước rồi mới hỏi.
 
 ### B5a. Required Evidence — Tool mới, unit test, UI
 
@@ -215,16 +244,16 @@ Chỉ điền nếu nhóm làm bonus (ghi riêng, tối đa 10 điểm). Tool c�
 
 | Bonus | Evidence File | What Worked | Risk / Guardrail |
 |---|---|---|---|
-| Small Local Model | xem B7 |  |  |
-| Hơn 3 tool mới (≥ 4) |  |  |  |
+| Small Local Model | xem B7 | Không thực hiện | Chưa chạy model Ollama nào |
+| Hơn 3 tool mới (≥ 4) | — | Không đạt: nhóm chỉ viết 1 tool mới (`artifact`) | — |
 | `send` gửi thật lên Telegram sau xác nhận | `starter_v0/transcripts/v1_gemini_web_20261110T185836854159.transcript.json` (chạy qua web UI, Gemini, prompt v3-gemini `b3626215b74b`; tên file ghi `v1` do nhãn `--version` khi bật server) | Lượt 1: user yêu cầu tìm 3 tin AI rồi đăng → agent gọi `clarify` (`yes_no`) hỏi xác nhận, chưa gửi. Lượt 2: user trả lời "có" → agent gọi `send(confirmed=true)` → `status: sent`, tin hiện trên kênh private của nhóm | Chỉ gửi sau khi user xác nhận ở lượt sau (rule trong `system_prompt.md` + mô tả `send` trong `tools.yaml`); token và chat ID chỉ nằm trong `.env`, đã kiểm tra transcript không chứa token |
-| Test challenge (0 skipped / regression test) | `pytest` output |  |  |
+| Test challenge (0 skipped / regression test) | `pytest` output | Không đạt: `pytest` báo 78 passed, **14 skipped** (stub TODO của tool có sẵn), chưa có regression test cho bug của tool có sẵn | — |
 
 Test challenge: số bug tìm được trong tool có sẵn (nếu có), cách sửa, và test regression tương ứng.
 
 ### B7. Small Local Model Challenge (bonus)
 
-Chỉ điền nếu nhóm làm bonus này.
+**Nhóm không thực hiện bonus này** (chưa chạy model Ollama nào), nên các bảng dưới để trống.
 
 | Version | Model (provider) | Prompt/Tools | case_accuracy | tool_routing | argument | multiturn | Run File |
 |---|---|---|---|---|---|---|---|
@@ -250,9 +279,12 @@ Lỗi đặc thù của model nhỏ (đếm từ run JSON):
 
 ## 5. Khó khăn và cách xử lý
 
-> Khó khăn chính và cách nhóm xử lý. Nếu gặp lỗi kỹ thuật (provider lỗi, hết quota API, tool không chạy), mô tả lỗi và dẫn bằng chứng: run JSON, log, ảnh chụp.
-
--
+1. **Chuỗi version chạy trên hai model khác nhau.** v0 và v1 chạy OpenAI, còn v0/v2/v3 của một thành viên chạy Gemini, nên mức tăng "0.75 → 0.90" không so sánh được. Cách xử lý: chốt OpenAI gpt-4o-mini cho cả chuỗi, chạy lại v2 và v3 trên OpenAI (`runs/v2_B_base_openai_20261110T183148819703.json`, `runs/v3_B_base_openai_20261110T184941408701.json`), giữ các run Gemini làm tham khảo (`v0-gemini`, `v2-gemini`, `v3-gemini` trong `version_log.csv`).
+2. **Bản v3 gốc có dấu hiệu tune theo bộ base.** Prompt chép nguyên văn câu của case R12 và ví dụ "AI", "tuần này"; trên OpenAI đạt 20/20 ở base nhưng chỉ 8/10 ở bộ group (`runs/v3-nam_B_group_openai_20261110T184801942989.json`). Cách xử lý: viết lại prompt không chép từ eval (v3 chính thức), dùng bộ group để kiểm tra chéo.
+3. **Hash tools/prompt khác nhau giữa các máy** do khác kết thúc dòng CRLF/LF (cùng nội dung nhưng `tools_hash` `474f8a0277b2` so với `eb21b1702350`). Cách xử lý: ghi chú trong `version_log.csv`; vòng sau nên thêm `.gitattributes`.
+4. **`send` lỗi trên máy chưa cấu hình Telegram.** Trong phiên A (`v3_openai_web_20261110T191013015667`) `send(confirmed=true)` trả `RuntimeError: Missing TELEGRAM_BOT_TOKEN…`. Agent báo lỗi trung thực. Bằng chứng gửi thành công nằm ở transcript Gemini của nhóm (B5).
+5. **Push bị từ chối do thành viên khác vừa đẩy commit.** Cách xử lý: `git pull --rebase` rồi push lại, không dùng force.
+6. **Bộ eval chấm khá chặt.** Harness gộp các lượt multi-turn thành một tin nhắn và chỉ chấm lượt cuối, nên chỉ kiểm tra được hành vi ở lượt cuối.
 
 ## 6. Tổng hợp đóng góp
 
@@ -260,11 +292,14 @@ Chi tiết đóng góp của từng thành viên nằm trong [TEAM.md](../../TEA
 
 ## 7. Hạn chế và hướng cải thiện — B6. Reflection
 
-- Fix nào thuộc `system_prompt.md`?
-- Fix nào thuộc `tools.yaml`?
-- Failure nào cần review thủ công thay vì chấm tự động?
-- Nếu có thêm một vòng, nhóm sẽ thử giả thuyết nào?
+- **Fix nào thuộc `system_prompt.md`?** Bỏ chỉ dẫn "đoán / gửi ngay / một bước" (v1, 0.65 → 0.75); rule điền `query`; luồng xác nhận `send` và không hỏi lại sau khi user đã xác nhận (v3).
+- **Fix nào thuộc `tools.yaml`?** Quy ước `response_type` của `clarify` (v1 gọi đúng `clarify` nhưng bỏ trống `response_type`); mô tả "dùng khi / không dùng khi" và ranh giới xác nhận của `send` (v2). Nhóm không tách được đóng góp riêng của từng phần vì v2 sửa nhiều tool cùng lúc.
+- **Failure nào cần review thủ công?** R08 và R14 "PASS" chỉ vì agent không gọi tool, nhưng vẫn trả lời thẳng bài toán/code thay vì từ chối; harness không phân biệt được. Hai lượt agent hỏi xác nhận/hỏi URL bằng văn bản thường thay vì tool `clarify` (phiên A lượt 4, phiên C lượt 1) vẫn đúng ý nhưng giao diện không đánh dấu "đang chờ". Một lần câu trả lời bằng tiếng Anh dù user hỏi tiếng Việt (phiên A lượt 1). Trong R12, agent xin xác nhận gửi khi chưa có nội dung cụ thể; chấm tự động coi là đúng.
+- **Nếu có thêm một vòng, nhóm sẽ thử:** (1) v4: chỉ xử lý yêu cầu ở lượt cuối của hội thoại để sửa G09 (gọi thêm `social_search`) và R10 (hồi quy: gọi `social_search` thay vì `clarify`); (2) chạy mỗi cấu hình nhiều lần để ước lượng nhiễu, vì mới có một run mỗi cấu hình; (3) thêm `.gitattributes` để hash tái lập giữa các máy; (4) thêm tool tra cứu tài khoản để xử lý tên người mơ hồ.
 
 ## 8. Tài liệu tham khảo
 
--
+- Đề bài và rubric: `README.md`, `CHECKPOINTS.md`, `RUBRIC.md`, `RULES.md`, `docs/TOOL-SETUP.md` trong repo.
+- Dịch vụ dùng cho tool: OpenAI API (model gpt-4o-mini), Tavily (`lookup`), Firecrawl (`fetch`), RapidAPI Twitter API45 (`timeline`, `social_search`), Telegram Bot API (`send`).
+- Triển khai link dùng thử: Cloudflare Tunnel (`cloudflared`).
+- Tool `artifact` mô phỏng đơn giản hoá cách Claude Artifacts và ChatGPT Canvas hoạt động (xem `starter_v0/tools/artifact/TOOL.md`).
