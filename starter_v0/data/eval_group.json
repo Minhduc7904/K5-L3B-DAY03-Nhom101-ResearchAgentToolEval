@@ -3,5 +3,189 @@
   "dataset_role": "group",
   "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_send_needs_confirmation",
+      "phase": "B",
+      "suite": "group",
+      "query": "Gửi dòng này lên Telegram: 'Họp 9h sáng mai'",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {"name": "clarify", "args": {"response_type": "yes_no"}}
+        ]
+      },
+      "metadata": {
+        "skill": "confirm_before_write",
+        "difficulty": "medium",
+        "what_it_tests": "Nội dung gửi đã rõ nhưng user chưa xác nhận → phải hỏi yes_no, KHÔNG gọi send ngay."
+      }
+    },
+    {
+      "id": "G02_handle_without_at",
+      "phase": "B",
+      "suite": "group",
+      "query": "Cho mình xem 3 tweet gần đây của @karpathy",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {"name": "timeline", "args": {"screenname": "karpathy", "limit": 3}}
+        ]
+      },
+      "metadata": {
+        "skill": "handle_format",
+        "difficulty": "easy",
+        "what_it_tests": "Handle người dùng viết có '@' → screenname phải bỏ '@' (karpathy), limit lấy đúng 3."
+      }
+    },
+    {
+      "id": "G03_timeframe_month",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm trên web các bài phân tích về chip AI trong tháng này",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {"name": "lookup", "args": {"timeframe": "month"}}
+        ]
+      },
+      "metadata": {
+        "skill": "timeframe_mapping",
+        "difficulty": "medium",
+        "what_it_tests": "Cụm 'trong tháng này' → lookup với timeframe=month (không dùng mặc định week)."
+      }
+    },
+    {
+      "id": "G04_smalltalk_no_tool",
+      "phase": "B",
+      "suite": "group",
+      "query": "Cảm ơn bạn nhé, hôm nay mình làm được nhiều việc rồi",
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "skill": "no_tool_needed",
+        "difficulty": "easy",
+        "what_it_tests": "Câu cảm ơn xã giao không cần tool nào → không được gọi tool thừa."
+      }
+    },
+    {
+      "id": "G05_ambiguous_person_name",
+      "phase": "B",
+      "suite": "group",
+      "query": "Cho mình xem tweet gần đây của anh Quang bên OpenAI",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {"name": "clarify", "args": {"response_type": "text"}}
+        ]
+      },
+      "metadata": {
+        "skill": "ask_instead_of_guess",
+        "difficulty": "hard",
+        "what_it_tests": "Tên người mơ hồ, không suy ra được handle → phải hỏi lại bằng clarify (text), KHÔNG đoán bừa một screenname. TODO: thay bằng case route tới tool mới khi nhóm chốt tool."
+      }
+    },
+    {
+      "id": "G06_confirm_then_send",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Đăng bản tin này lên Telegram giúp mình"},
+        {"role": "user", "content": "Nội dung là: Cập nhật AI tuần này"},
+        {"role": "user", "content": "Ok, đúng rồi, gửi đi"}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {"name": "send", "args": {"confirmed": true}}
+        ]
+      },
+      "metadata": {
+        "skill": "send_after_confirmation",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi user xác nhận rõ → gọi send với confirmed=true (luồng hỏi → xác nhận → gửi)."
+      }
+    },
+    {
+      "id": "G07_cancel_send",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Đăng bản tin này lên Telegram giúp mình"},
+        {"role": "user", "content": "Nội dung là: Cập nhật AI tuần này"},
+        {"role": "user", "content": "Khoan, đừng gửi nữa, mình đổi ý rồi"}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "no_tool": true
+      },
+      "metadata": {
+        "skill": "respect_cancel",
+        "difficulty": "hard",
+        "what_it_tests": "User rút lại yêu cầu ở lượt cuối → tuyệt đối không gọi send (cũng không cần tool nào)."
+      }
+    },
+    {
+      "id": "G08_switch_search_type_top",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Mọi người nói gì về Claude trên Twitter?"},
+        {"role": "user", "content": "Cho mình xem những bài nổi bật nhất thôi"}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {"name": "social_search", "args": {"search_type": "Top"}}
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_search_type",
+        "difficulty": "medium",
+        "what_it_tests": "Lượt sau yêu cầu bài 'nổi bật nhất' → social_search với search_type=Top, vẫn giữ chủ đề Claude."
+      }
+    },
+    {
+      "id": "G09_switch_timeline_to_web",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tweet mới nhất của Sam Altman là gì?"},
+        {"role": "user", "content": "Giờ bỏ Twitter, tìm tin tức về OpenAI trên web hôm nay"}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {"name": "lookup", "args": {"topic": "news", "timeframe": "day"}}
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_switch_tool",
+        "difficulty": "hard",
+        "what_it_tests": "Đổi giữa chừng từ timeline sang lookup (topic=news, timeframe=day); không dính lại tool ở lượt trước."
+      }
+    },
+    {
+      "id": "G10_ignore_offtopic_first_turn",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Viết giúp mình một bài thơ về mùa thu"},
+        {"role": "user", "content": "Thôi bỏ đi, tìm giúp mình tin AI hôm nay"}
+      ],
+      "failure_type": "out_of_scope",
+      "expect": {
+        "tool_calls": [
+          {"name": "lookup", "args": {"topic": "news", "timeframe": "day"}}
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_recover_scope",
+        "difficulty": "medium",
+        "what_it_tests": "Lượt đầu ngoài phạm vi, lượt cuối mới là yêu cầu thật → agent chỉ xử lý lượt cuối (lookup news, day)."
+      }
+    }
+  ]
 }

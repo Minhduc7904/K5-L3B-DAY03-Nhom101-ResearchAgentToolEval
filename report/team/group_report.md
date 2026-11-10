@@ -64,7 +64,7 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 |---|---|---|---:|---:|---|
 | v0 | baseline | Đo hành vi chưa tối ưu trước khi sửa | n/a | 0.65 (13/20) | `runs/v0_B_base_openai_20261110T172311282476.json` |
 | v1 | system_prompt.md | Bỏ chỉ dẫn xấu (đoán / gửi ngay / một bước), thêm rule `clarify` khi thiếu thông tin và xác nhận trước `send`; không đụng `tools.yaml` | 0.65 | 0.75 (15/20) | `runs/v1_B_base_openai_20261110T175547880942.json` |
-| v2 | tools.yaml | Viết rõ khi nào dùng/không dùng cho từng tool; chuẩn hóa convention args (response_type='text'/'yes_no', handle không '@', topic, timeframe) | 0.75 | 0.90 (18/20) | `runs/v2_B_base_gemini_20261110T182232420866.json` |
+| v2 | tools.yaml (viết lại mô tả nhiều tool, xem ghi chú) | `tools.yaml` mơ hồ (không nói khi nào dùng/không dùng, thiếu quy ước `response_type`, `topic`, handle) là nguyên nhân lỗi còn lại của v1. **Lưu ý: thay đổi gộp nhiều tool, không phải một giả thuyết đơn lẻ** | 0.75 | 0.95 (19/20) | `runs/v2_B_base_openai_20261110T183148819703.json` |
 | v3 |  |  |  |  |  |
 
 Các chỉ số chi tiết (từ `summary` trong run JSON):
@@ -73,15 +73,16 @@ Các chỉ số chi tiết (từ `summary` trong run JSON):
 |---|---:|---:|---:|---:|---|
 | v0 | 0.65 | 0.70 | 0.65 | 1.000 | R03, R08, R10, R11, R12, R13, R14 |
 | v1 | 0.75 | 0.90 | 0.75 | 0.667 | R10, R11, R12, M02, M06 |
-| v2 | 0.90 | 1.00 | 0.90 | 1.000 | R03, R12 |
+| v2 (OpenAI) | 0.95 | 1.00 | 0.95 | 1.000 | R12 |
 
-Nhận xét v2 (dựa trên run JSON):
+Nhận xét v2 (dựa trên run JSON `v2_B_base_openai_20261110T183148819703.json`, OpenAI gpt-4o-mini, cùng model với v0 và v1):
 
-- **Độ chính xác tăng vượt bậc từ 75% lên 90% (18/20 case PASS)**.
-- **Tool routing đạt 100% (20/20 case)**: Agent không còn bất kỳ lỗi chọn sai tool nào.
-- **Multiturn accuracy đạt 100%**: Sửa hoàn toàn lỗi hồi quy ở M02 và M06 nhờ phân định rạch ròi phạm vi giữa `lookup` (tìm web) và `social_search` (tìm mạng xã hội).
-- **Sửa thành công R10 và R11**: Model đã điền chính xác `response_type="text"` khi gọi `clarify` nhờ mô tả chi tiết quy ước trong `tools.yaml`.
-- Chỉ còn 2 case chưa hoàn hảo: `R03` (query dư chữ) và `R12` (boundary xác nhận của `send`).
+- Kết quả: 19/20 PASS (0.95), tool routing 1.00, multiturn 1.00, `provider_error_cases=0`, `measured_cases=20`. Chỉ còn R12 FAIL.
+- R10, R11 giờ gọi `clarify` và điền `response_type="text"`; M02, M06 và R03, R13 cũng PASS. Các thay đổi này cùng xảy ra khi `tools.yaml` được viết lại, **nhưng không thể gán riêng cho `response_type`** vì v2 sửa mô tả của nhiều tool cùng lúc (`clarify`, `timeline`, `social_search`, `lookup`, `fetch`, `send`...). Vì vậy v2 không đạt chuẩn "một giả thuyết mỗi version"; đây là một hạn chế của nhóm. Chưa có run cô lập để tách đóng góp từng phần.
+- R12 vẫn FAIL: agent gọi `clarify` nhưng với `response_type="text"` (hỏi nội dung bản tin) thay vì `yes_no`. Có thể do case "Đăng bản tin này lên Telegram" chưa có nội dung cụ thể để xác nhận; cần xem lại bằng prompt hoặc ví dụ, không chỉ bằng mô tả tool.
+- Rủi ro đo lường: một số ví dụ trong mô tả `tools.yaml` (tên người, URL, chủ đề) trùng nội dung `data/eval_base.json`, nên điểm base của v2 có thể cao hơn thực lực. Cần dùng bộ `eval_group.json` (case do nhóm tự viết) để kiểm tra chéo.
+- Run Gemini của Nam (`v0_B_base_gemini_...`, `v2_B_base_gemini_...`, model `gemini-3.5-flash-lite`) chỉ để tham khảo, **không dùng trong chuỗi v0→v3** vì khác model với v0/v1. Gemini v2 đạt 0.90 (18/20), FAIL R03, R12; Gemini v0 đạt 0.65.
+- Hash `tools_hash` của cùng một nội dung `tools.yaml` khác nhau giữa các máy (`474f8a0277b2` trên máy Đức, `eb21b1702350` trên máy Nam) vì khác kết thúc dòng CRLF/LF, không phải khác nội dung.
 
 Nhận xét v1 (dựa trên run JSON):
 

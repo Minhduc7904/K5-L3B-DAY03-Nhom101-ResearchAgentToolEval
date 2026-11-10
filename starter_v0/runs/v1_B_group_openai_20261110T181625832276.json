@@ -1,0 +1,826 @@
+{
+  "run_id": "v1_B_group_openai_20261110T181625832276",
+  "version": "v1",
+  "artifact_version": "v1+p5cb8a5dca3e1+te69bc53ed884",
+  "prompt_hash": "5cb8a5dca3e1a8b0f1bd1ba51edc3e9359a16cef024064f8ef513531017a7d87",
+  "tools_hash": "e69bc53ed8846a5c2192e950c539806a61a6902b718f06d6773db6a42e9b996c",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "C:\\Users\\nmduc\\Desktop\\AI_VinUni\\day_3_10-11-2026\\lab\\K5-L3-DAY03-ResearchAgentToolEval\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "C:\\Users\\nmduc\\Desktop\\AI_VinUni\\day_3_10-11-2026\\lab\\K5-L3-DAY03-ResearchAgentToolEval\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_group.json",
+  "dataset_id": "day03_v2_research_group",
+  "dataset_role": "group",
+  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
+  "generated_at": "2026-11-10T18:16:25",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 10,
+    "provider_error_cases": 0,
+    "passed_cases": 9,
+    "case_accuracy": 0.9,
+    "tool_routing_accuracy": 0.9,
+    "argument_accuracy": 0.9,
+    "multiturn_accuracy": 1.0,
+    "failure_counts": {
+      "missing_info": 1
+    },
+    "observed_mismatch_counts": {
+      "missing_tool_call": 1
+    }
+  },
+  "results": [
+    {
+      "id": "G01_send_needs_confirmation",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "confirm_before_write",
+        "difficulty": "medium",
+        "what_it_tests": "Nội dung gửi đã rõ nhưng user chưa xác nhận → phải hỏi yes_no, KHÔNG gọi send ngay."
+      },
+      "input": "Gửi dòng này lên Telegram: 'Họp 9h sáng mai'",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có xác nhận nội dung cần gửi là: 'Họp 9h sáng mai'?",
+              "response_type": "yes_no"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có xác nhận nội dung cần gửi là: 'Họp 9h sáng mai'?",
+            "response_type": "yes_no"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có xác nhận nội dung cần gửi là: 'Họp 9h sáng mai'?",
+            "response_type": "yes_no",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G02_handle_without_at",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "handle_format",
+        "difficulty": "easy",
+        "what_it_tests": "Handle người dùng viết có '@' → screenname phải bỏ '@' (karpathy), limit lấy đúng 3."
+      },
+      "input": "Cho mình xem 3 tweet gần đây của @karpathy",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "karpathy",
+            "limit": 3
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "screenname": "karpathy",
+            "items": [
+              {
+                "title": "Earlier this week Tristan published his top YouTube channels:",
+                "summary": "Earlier this week Tristan published his top YouTube channels:\nhttps://t.co/NZ3UCNo6cT\nWhich looked excellent so clearly I had to turn it into TristanTube:\nhttps://t.co/l0KyW1WdNH\n47K super nerdy videos +TV mode for laid back watching. (One-shotted with Claude Code in 3 minutes)",
+                "url": "https://x.com/karpathy/status/2119114537442189652",
+                "source": "@karpathy",
+                "date": "Sat Nov 07 17:07:31 +0000 2026",
+                "metrics": {
+                  "favorites": 9177,
+                  "retweets": 772,
+                  "views": "944567"
+                }
+              },
+              {
+                "title": "Weekend hack: HackerTube. I was annoyed with YouTube's recommendations so I had Claude filter down 43M comments over 20 ",
+                "summary": "Weekend hack: HackerTube. I was annoyed with YouTube's recommendations so I had Claude filter down 43M comments over 20 years of HN to 6,454 videos that keep being recommended. *Significantly* better viewing experience, ~2 hours with Opus 5.5:\nhttps://t.co/JIhXN7OSh1\n\n- Excellent recs without any logins (state is kept in local browser session)\n- Thumbnail is a representative frame from middle of the video instead of the super duper A/B test hyper-optimized user uploads\n- Underlying data from the comment analysis as one zip file, point your Claude at it and ask for your own version\n- HackerTube Longs ✊\n\nA bit more on the process:\nI use Claude Code (desktop app for Mac), Opus 5.5 on Medium effort as my default. I only talk to Claude and have it do everything, the only \"manual work\" I helped with in tandem was in the browser (reminiscent of MenuGen): 1) I had to create some kind of API key from Google Cloud UI to query YouTube for video metadata, 2) I booted up a VPS box for serving and 3) I bought the domain name. Once the box was up I gave Claude the IP and told it update, secure, harden, deploy and optimize the code, and it did the whole thing.\n\nMany awesome projects that would have normally taken weeks/months even can now be few-shotted for breakfast. What else are we not thinking of.",
+                "url": "https://x.com/karpathy/status/2116957135661945283",
+                "source": "@karpathy",
+                "date": "Sun Nov 01 18:14:46 +0000 2026",
+                "metrics": {
+                  "favorites": 52355,
+                  "retweets": 4836,
+                  "views": "5724501"
+                }
+              },
+              {
+                "title": "RT @Tristan0x: If you've ever wondered why smart TVs are so cheap, this is why.",
+                "summary": "RT @Tristan0x: If you've ever wondered why smart TVs are so cheap, this is why.\n\n@log4j rooted his Samsung and found an always-on hot mic,…",
+                "url": "https://x.com/karpathy/status/2114384346815820050",
+                "source": "@karpathy",
+                "date": "Sun Oct 25 15:51:26 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 3287,
+                  "views": "40227"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G03_timeframe_month",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "timeframe_mapping",
+        "difficulty": "medium",
+        "what_it_tests": "Cụm 'trong tháng này' → lookup với timeframe=month (không dùng mặc định week)."
+      },
+      "input": "Tìm trên web các bài phân tích về chip AI trong tháng này",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "timeframe": "month"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "phân tích chip AI",
+              "topic": "general",
+              "timeframe": "month",
+              "max_results": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "phân tích chip AI",
+            "topic": "general",
+            "timeframe": "month",
+            "max_results": 5
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "phân tích chip AI",
+            "topic": "general",
+            "timeframe": "month",
+            "items": [
+              {
+                "title": "Hai ông lớn đứng sau cuộc đua chip AI? - CEO LAB",
+                "url": "https://www.facebook.com/ceolab.vn/posts/hai-%C3%B4ng-l%E1%BB%9Bn-%C4%91%E1%BB%A9ng-sau-cu%E1%BB%99c-%C4%91ua-chip-ai/1053202854441912",
+                "source": "facebook.com",
+                "summary": "cuốn sách cũng phân tích chi tiết các loại chip tiên tiến đang được phát triển để phục vụ cho AI, từ chip xử lý đơn nhân đến chip song song và siêu máy tính.",
+                "score": 0.76992935
+              },
+              {
+                "title": "Phần 5 của Ai đang dẫn đầu cuộc đua chip? Từ Intel ...",
+                "url": "https://www.facebook.com/tam.ttc/posts/ph%E1%BA%A7n-5-c%E1%BB%A7a-ai-%C4%91ang-d%E1%BA%ABn-%C4%91%E1%BA%A7u-cu%E1%BB%99c-%C4%91ua-chip-t%E1%BB%AB-intel-samsung-%C4%91%E1%BA%BFn-nvidia-1-intel-amd/4249946801807939",
+                "source": "facebook.com",
+                "summary": "Karl Freund, nhà phân tích chính của Cambrian AI Research cho biết: “Mọi thứ đã tập hợp lại thành một thị trường chủ yếu do Nvidia kiểm soát.",
+                "score": 0.6530611
+              },
+              {
+                "title": "NVIDIA Có Thể Mất Tất Cả Nếu CUDA Không Còn?",
+                "url": "https://www.youtube.com/watch?v=WzgT4vrx8RI",
+                "source": "youtube.com",
+                "summary": "NVIDIA thống trị thị trường chip AI,&nbsp;... Video phân tích cuộc cạnh tranh giữa NVIDIA, AMD ROCm, Intel và Google TPU, cùng nguy cơ",
+                "score": 0.47446132
+              },
+              {
+                "title": "Chip 2nm Có Thể Làm Lung Lay Đế Chế GPU?",
+                "url": "https://www.youtube.com/watch?v=5QpF3nbNy_0",
+                "source": "youtube.com",
+                "summary": "... AI? Video phân tích Apple M6 , NVIDIA RTX 5090 , CUDA , công nghệ chip 2nm và tương lai ngành bán dẫn toàn cầu . #tamnhinkynguyen #congngheai ...Read more",
+                "score": 0.40867847
+              },
+              {
+                "title": "AI đang tham gia tạo ra chính những con chip thế hệ tiếp ...",
+                "url": "https://www.instagram.com/p/Dei6aJmicM5",
+                "source": "instagram.com",
+                "summary": "Và một vòng lặp đặc biệt đang hình thành: Chip mạnh hơn → AI mạnh hơn → AI giúp thiết kế và sản xuất chip tốt hơn → chip tiếp tục mạnh hơn. Khi AI có thể ...Read more",
+                "score": 0.39201146
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G04_smalltalk_no_tool",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "no_tool_needed",
+        "difficulty": "easy",
+        "what_it_tests": "Câu cảm ơn xã giao không cần tool nào → không được gọi tool thừa."
+      },
+      "input": "Cảm ơn bạn nhé, hôm nay mình làm được nhiều việc rồi",
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Rất vui khi nghe điều đó! Nếu bạn cần hỗ trợ gì thêm hoặc có câu hỏi nào, hãy cho mình biết nhé!",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G05_ambiguous_person_name",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "ask_instead_of_guess",
+        "difficulty": "hard",
+        "what_it_tests": "Tên người mơ hồ, không suy ra được handle → phải hỏi lại bằng clarify (text), KHÔNG đoán bừa một screenname. TODO: thay bằng case route tới tool mới khi nhóm chốt tool."
+      },
+      "input": "Cho mình xem tweet gần đây của anh Quang bên OpenAI",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "QuangOpenAI"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "missing_tool_call",
+        "failure_type": "missing_info",
+        "failures": [
+          "missing tool call clarify",
+          "extra tool call timeline"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "QuangOpenAI"
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "error": "JSONDecodeError",
+            "message": "Expecting value: line 1 column 1 (char 0)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G06_confirm_then_send",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "send_after_confirmation",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi user xác nhận rõ → gọi send với confirmed=true (luồng hỏi → xác nhận → gửi)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Đăng bản tin này lên Telegram giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Nội dung là: Cập nhật AI tuần này"
+        },
+        {
+          "role": "user",
+          "content": "Ok, đúng rồi, gửi đi"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "text": "Cập nhật AI tuần này",
+              "confirmed": true
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "send",
+          "args": {
+            "text": "Cập nhật AI tuần này",
+            "confirmed": true
+          },
+          "result": {
+            "tool": "send_telegram",
+            "error": "RuntimeError",
+            "message": "Missing TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID env var"
+          }
+        }
+      ]
+    },
+    {
+      "id": "G07_cancel_send",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "respect_cancel",
+        "difficulty": "hard",
+        "what_it_tests": "User rút lại yêu cầu ở lượt cuối → tuyệt đối không gọi send (cũng không cần tool nào)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Đăng bản tin này lên Telegram giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Nội dung là: Cập nhật AI tuần này"
+        },
+        {
+          "role": "user",
+          "content": "Khoan, đừng gửi nữa, mình đổi ý rồi"
+        }
+      ],
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Hiểu rồi! Nếu bạn cần gì khác hoặc muốn gửi nội dung sau này, hãy cho mình biết nhé!",
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G08_switch_search_type_top",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_search_type",
+        "difficulty": "medium",
+        "what_it_tests": "Lượt sau yêu cầu bài 'nổi bật nhất' → social_search với search_type=Top, vẫn giữ chủ đề Claude."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Mọi người nói gì về Claude trên Twitter?"
+        },
+        {
+          "role": "user",
+          "content": "Cho mình xem những bài nổi bật nhất thôi"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "search_type": "Top"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "Claude",
+              "search_type": "Top",
+              "limit": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "social_search",
+          "args": {
+            "query": "Claude",
+            "search_type": "Top",
+            "limit": 5
+          },
+          "result": {
+            "tool": "search_tweets",
+            "query": "Claude",
+            "search_type": "Top",
+            "items": [
+              {
+                "title": "Elon musk, on lex fridman last month: \"anyone not running a swarm of agents by the end of 2026 will look like someone wh",
+                "summary": "Elon musk, on lex fridman last month: \"anyone not running a swarm of agents by the end of 2026 will look like someone who refused to use email in 1998\"\n\nthis is what he meant, in one screen recording:\n\none guy. 50 claude agents. a full working system shipped in 30 minutes. he did not write a single line of code. he gave the orders and watched them execute in parallel, each one handling a different piece of the build\n\nmeanwhile 90% of people reading this are still using claude the same fucking way they used chatgpt in 2023. one chat window. one task at a time. asking the same question in the same thread until it finally gets it right\n\nthe setup costs you one evening to learn and pays back forever. whoever learns it this month will be running 10x what their coworkers ship by january. the ones who do not will still be slow-typing into a blank chat like it is still 2023\n\ni wrote the full breakdown of how the 50-agent setup works, what each agent is told to do, and the exact claude code config behind it. the article is below\n\nthe gap between the person who runs agents and the person who runs chats is about to become the only gap that matters. do not land on the wrong side of it",
+                "url": "https://x.com/yurshevv/status/2119190722783981671",
+                "source": "@yurshevv",
+                "date": "Sat Nov 07 22:10:15 +0000 2026",
+                "metrics": {
+                  "favorites": 3940,
+                  "retweets": 261,
+                  "views": "572334"
+                }
+              },
+              {
+                "title": "THIS IS AN ABSOLUTE GOLDMINE. ",
+                "summary": "THIS IS AN ABSOLUTE GOLDMINE. \n\nSomeone put together 475 video demos created with Claude Opus 5.5 in one GitHub repository.\n\nWe're talking:\n\n- Motion graphics\n- Animated explainers\n- 3D environments\n- Interactive experiences\n- Even playable games\n\nAnd here's the best part:\n\nEvery demo includes its original prompt and source post, so you can study how it was made, recreate it, and experiment with your own ideas.\n\nBuilt with HTML, Canvas, SVG, and Three.js.\n\n475 projects to explore. Endless inspiration to borrow from.\n\n🔖 Save this one. The repo is in the comments. 👇",
+                "url": "https://x.com/isagi1000x/status/2118605635461779637",
+                "source": "@isagi1000x",
+                "date": "Fri Nov 06 07:25:19 +0000 2026",
+                "metrics": {
+                  "favorites": 1453,
+                  "retweets": 159,
+                  "views": "122968"
+                }
+              },
+              {
+                "title": "this is f*cking insane... Boris Cherny's team at Anthropic just shared 94 Claude plugins and skills for free. ALL OF THE",
+                "summary": "this is f*cking insane... Boris Cherny's team at Anthropic just shared 94 Claude plugins and skills for free. ALL OF THEM\n\none answers your emails. one chases clients who didn't pay. one finds the trap in your contract. one fixes your code while you sleep\n\n55 plugins for Claude Code\n20 plugins for real jobs: sales, legal, finance, marketing\n19 skills: Excel, PowerPoint, PDF, Word and more\n\n269,000 GitHub stars between them. agencies charge $300-1,500 to build just one of these. here all 94 cost $0\n\nhow to grab one:\n\n1. open Claude Code and type /plugin\n2. pick the one for the job you hate most\n3. hit install\n4. give it the first task in chat\n\nplugins: https://t.co/Rx8gGKjui4\nwork plugins: https://t.co/KQWmMlhXuy\nskills: https://t.co/Xv9APhlSU2\n\nstart small: one plugin today for the task you repeat every week\n\nplugins are the start. how to build your own AI agents is in the article below ↓",
+                "url": "https://x.com/mika_systems/status/2119152475949441028",
+                "source": "@mika_systems",
+                "date": "Sat Nov 07 19:38:16 +0000 2026",
+                "metrics": {
+                  "favorites": 762,
+                  "retweets": 89,
+                  "views": "54503"
+                }
+              },
+              {
+                "title": "THIS IS ACTUAL F*CKING GOLD",
+                "summary": "THIS IS ACTUAL F*CKING GOLD\n\nAnthropic just shared one of the best tricks for Claude Code.\n\nThe idea: run Sonnet, Haiku and Opus 5.5 together, each one doing only the job it's best at.\n\nOpus-level judgment on every big call, without paying Opus rates for every routine turn.\n\nYou just launch Claude Code like this:\n\nclaude --model sonnet --advisor opus\n\nhere's the split:\n\n→ Sonnet 5.5 runs the session and writes the code\n→ Haiku 5.5 explores files and docs in parallel\n→ Opus 5.5 stays on call as advisor for the big calls\n→ you stop spending Opus on work that doesn't need it\n\nOpus only steps in at three moments:\n\n→ before a plan locks\n→ when the same error shows up twice\n→ before calling it done\n\nSonnet builds. Haiku explores. Opus reviews.\n\nJEV engineering is the same move one layer down: the forks that need no thinker (which file, which tool, retry or stop) go to JEV in milliseconds, and the big models only see the ones that split\n\nthe full tree\n> Sonnet 5.5 runs the main session and edits code\n> search maps the repo on Haiku 5.5\n> grep finds call sites on Haiku 5.5\n> docs pulls the API reference on Haiku 5.5\n> Opus 5.5 on call as advisor, reads the whole transcript when consulted\n> JEV routes micro-forks in milliseconds\n\npaste the tree and this prompt into Claude Code ↓\n\n\"Rebuild my Claude Code setup around this tree:\n1. Run the main session on Sonnet 5.5 with Opus 5.5 as advisor.\n2. Create three read-only Haiku 5.5 subagents: search (maps the repo), grep (finds call sites), docs (pulls the API reference).\n3. Add one rule to CLAUDE.md: consult the advisor before locking a plan, after the same error twice, and before calling a task done.\n4. Route fast deterministic forks (tool choice, path selection, retries) through JEV.\nShow me every change as a diff first. No edits until I say go.\"\n\n↳ https://t.co/bsYb2K5H9G\n\nsave it, you'll use this every single day.",
+                "url": "https://x.com/xsmryze/status/2118087892354449537",
+                "source": "@xsmryze",
+                "date": "Wed Nov 04 21:08:00 +0000 2026",
+                "metrics": {
+                  "favorites": 1303,
+                  "retweets": 112,
+                  "views": "191575"
+                }
+              },
+              {
+                "title": "This is f*cking insane. The engineer who built Claude Code just dropped a 28-minute video on how to write prompts that a",
+                "summary": "This is f*cking insane. The engineer who built Claude Code just dropped a 28-minute video on how to write prompts that actually work.\n\nI've seen $600 courses that don't cover what he shows in the first 5 minutes.\n\nWatch it, then read the guide below on the Claude features 99% of users never find.",
+                "url": "https://x.com/AnatoliKopadze/status/2117635023092211803",
+                "source": "@AnatoliKopadze",
+                "date": "Tue Nov 03 15:08:27 +0000 2026",
+                "metrics": {
+                  "favorites": 4911,
+                  "retweets": 574,
+                  "views": "1020908"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G09_switch_timeline_to_web",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_switch_tool",
+        "difficulty": "hard",
+        "what_it_tests": "Đổi giữa chừng từ timeline sang lookup (topic=news, timeframe=day); không dính lại tool ở lượt trước."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tweet mới nhất của Sam Altman là gì?"
+        },
+        {
+          "role": "user",
+          "content": "Giờ bỏ Twitter, tìm tin tức về OpenAI trên web hôm nay"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "OpenAI",
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "OpenAI",
+            "topic": "news",
+            "timeframe": "day",
+            "max_results": 5
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "OpenAI",
+            "topic": "news",
+            "timeframe": "day",
+            "items": [
+              {
+                "title": "OpenAI",
+                "url": "https://tavily.com/knowledge/company/p4PyTakV77G9",
+                "source": "tavily.com",
+                "summary": "# OpenAI\nID: p4PyTakV77G9\nWebsite: www.openai.com\nHeadquarters: San Francisco, CA, United States\nLinkedIn: www.linkedin.com/company/openai · 11,529,792 followers\nIndustry: Research Services\nIndustry codes: SIC 87, 873, NAICS 54, 541\nCompany type: Partnership\nSocial profiles: www.facebook.com/openai, www.twitter.com/openai, www.crunchbase.com/organization/openai, www.instagram.com/openai.gpt, www.instagram.com/openai, www.youtube.com/@openai, www.youtube.com/openai, github.com/openai [...] Description: OpenAI is a company that believes in research and development to lead to artificial general intelligence, a system that can solve human-level problems. [...] ## Products and services\nKeywords: research & development, emerging ai software, openai, artificial intelligence machine learning, artificial general intelligence, development, research, human-level problems, technology, application-software, artificial-intelligence, platform",
+                "score": 0.90593183
+              },
+              {
+                "title": "Anthropic and OpenAI are coming for the development workflow | InfoWorld",
+                "url": "https://www.infoworld.com/article/4246055/anthropic-and-openai-are-coming-for-the-development-workflow.html",
+                "source": "infoworld.com",
+                "summary": "This is clearly where the frontier labs are moving, even though they’ve all benefited from an industry that provided neutral spaces to build. For example, OpenAI developed Pando, a Git back end for its own monorepo, to handle more engineers and agents reading and writing code concurrently. Its engineers kept using Git. OpenAI retained compatibility with the protocol and client and contributed improvements upstream. That compatibility let it rebuild the back end around the way its engineers [...] This pressure to maximize profitability helps explain why frontier labs like Anthropic and OpenAI are aggressively adding functionality to own more of the developer’s workflow. On November 4, OpenAI announced an agreement to buy Pierre, the company behind Code Storage and the open source libraries Codex already uses to browse files and review changes. OpenAI wants Codex to be where developers work, from the first branch an agent creates through deployment of the application. There’s money in [...] OpenAI or Anthropic could build the place developers prefer to work. The question is what happens when a team likes that place and wants a rival’s agent for a particular job. Maybe a startup has built a tool that can track down the intermittent test failure that’s had the team stumped for a week. Give it access to the code and test history the team has authorized, and it gets a chance to prove itself. Ask the team to move its work to a new platform first, and it probably never gets to try.",
+                "score": 0.5367749
+              },
+              {
+                "title": "Artificial Star Andrew Garfield Once Admired OpenAI CEO Sam Altman",
+                "url": "https://variety.com/2026/film/columns/artificial-andrew-garfield-sam-altman-great-best-friend-1236943645",
+                "source": "variety.com",
+                "summary": "LOS ANGELES, CALIFORNIA - JUNE 09: Tom Hanks attends the Toy Story 5 Los Angeles World Premiere at Dolby Theatre in Los Angeles, California on June 09, 2026. (Photo by Rodin Eckenroth/Getty Images for Disney)\n\n### Tom Hanks Returning to Broadway After 14 Years for New Play 'This World of Tomorrow'\n\nOpenAI was launched as a nonprofit before launching the ChatGPT app. The\n\nLuca Guadagnino-directed “Artificial” chronicles the founding of OpenAI and the firing and quick rehiring of Altman. [...] “The first time I saw Sam, he was testifying in front of Congress and he was saying incredibly righteous stuff,” Garfield said Monday night during a Q&A following an AMPAS screening of the film at the Academy Museum in Los Angeles. “He was talking about transparency; he was talking about the risks. He was very, very casually saying, ‘No, I don’t have any equity in OpenAI. I’m just doing this because I love the technology and I’m passionate and I actually care about human beings.’”",
+                "score": 0.48718598
+              },
+              {
+                "title": "Australia to mandate AI breach reporting, create regulator after OpenAI breach | Reuters",
+                "url": "https://www.reuters.com/world/australia-tightens-ai-oversight-rules-after-openai-agent-breached-government-2026-11-10",
+                "source": "reuters.com",
+                "summary": "OpenAI has said it learned of the breach only in August ​and that the incident was unintentional. Its review found no evidence that patient records were accessed by ‌the ⁠agent.\n\nThe breach has added to friction between Australia and US technology companies, after Canberra refused ChatGPT maker OpenAI and rival Anthropic exemptions from copyright laws for model training, instead requiring them to negotiate licensing agreements with Australian rights holders. [...] The OpenAI agent gained unauthorised access to the medical statistics portal ​of Medicare, Australia's universal health insurance programme, while conducting research on public medical ​spending, the government said in September. The breach triggered a rapid ⁠government review into the incident.\n\nThe Misinformation Monitor newsletter rounds up international misinformation narratives, with a \"Real or Fake?\" quiz in every edition. Sign up here. [...] SYDNEY, Nov 10 (Reuters) - Australia will require artificial intelligence companies to report breaches ‌and consider changes to criminal law to address \"serious misconduct\", Prime Minister Anthony Albanese said on Tuesday, after an OpenAI agent broke into a government website.",
+                "score": 0.40924495
+              },
+              {
+                "title": "ChatGPT Enterprise now available in AWS Marketplace",
+                "url": "https://openai.com/index/chatgpt-enterprise-aws-marketplace",
+                "source": "openai.com",
+                "summary": "> “Enterprises increasingly rely on both AWS and OpenAI to put AI to work, and our partnership is about making that combination stronger for them. Joint customers can now bring ChatGPT to their teams through the cloud provider they already trust. Together with AWS, we’re simplifying the path to adoption and helping more organizations unlock what’s possible with AI at scale.”\n\n—Chris Grusz, Managing Director, Cloud Partnerships, OpenAI",
+                "score": 0.33639696
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G10_ignore_offtopic_first_turn",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_recover_scope",
+        "difficulty": "medium",
+        "what_it_tests": "Lượt đầu ngoài phạm vi, lượt cuối mới là yêu cầu thật → agent chỉ xử lý lượt cuối (lookup news, day)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Viết giúp mình một bài thơ về mùa thu"
+        },
+        {
+          "role": "user",
+          "content": "Thôi bỏ đi, tìm giúp mình tin AI hôm nay"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "tin AI",
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "out_of_scope",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "tin AI",
+            "topic": "news",
+            "timeframe": "day",
+            "max_results": 5
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "tin AI",
+            "topic": "news",
+            "timeframe": "day",
+            "items": [
+              {
+                "title": "Tin Demand Growth Outpacing Refined Supply  - The Villager Newspaper",
+                "url": "https://www.thevillager.com.na/mining/2026/tin-demand-growth-outpacing-refined-supply",
+                "source": "thevillager.com.na",
+                "summary": "The other sector that is demanding tin is the AI & 5G sector. This is for the expected increase in the building of data centres and the need for electronics.\n\nThe global demand for 5G infrastructure and AI data requires 10 times the current data storage requirements by 2030. Macro base stations and power amplifiers are expected to keep tin demand elevated.\n\nFIRST HALF PERFORMANCE\n\nThe first half of 2026 tin realised price by Andrada was US$52 131/t, recording an increase of 57%. [...] Tin demand has  benefited from the solar sector, which has recorded a 40% year-on-year growth with more demand for solar ribbons and PV electronics expected.\n\nThe second sector is electric vehicles (EVs), for power electronics.\n\nThe electric vehicle market share is already around 15% of car sales, and with it, demand for power electronics, wiring & connectors and charging stations, will require tin. [...] The company revealed that revenue increased by 80% to N$456 million, while gross profit more than quadrupled to N$184 million, with gross margins exceeding 40%.\n\nAndrada’s portfolio consists of tin, copper, lithium, tungsten, and tantalum. \n\nThe revenue growth was powered primarily by higher tin production and stronger commodity prices. \n\nTin production at the Uis mine increased by 13% to 576 tonnes, with ongoing funded expansion projects targeting annual production of up to 1,900 tonnes.",
+                "score": 0.6347929
+              },
+              {
+                "title": "Vanta to Acquire Pillar Security to Turn AI Policy Into Practice",
+                "url": "https://www.businesswire.com/news/home/20261109942783/en/Vanta-to-Acquire-Pillar-Security-to-Turn-AI-Policy-Into-Practice",
+                "source": "businesswire.com",
+                "summary": "“Customers, regulators and auditors want proof that a company’s AI does what it says on the tin,” said Christina Cacioppo, CEO and co-founder, Vanta. “A policy document doesn’t get you there. Pillar Security lets companies test their agents and stop them when they go out of bounds, and Vanta turns all of that into evidence.”\n\nFounded in 2023 by Ziv Karliner and Dor Sarig, Pillar Security gives companies one platform to discover, test, secure and govern AI agents. [...] As AI evolves into agents that take action, they can access sensitive data, use permissions in unexpected ways and take paths no one anticipated during their initial review. Vanta’s own research shows 65% of IT and business leaders say their use of agentic AI is outpacing their understanding of it, and fewer than half (48%) have a framework for granting or limiting AI autonomy.1",
+                "score": 0.4450718
+              },
+              {
+                "title": "The world's most powerful AI has received an incredible upgrade.",
+                "url": "https://www.vietnam.vn/en/ai-manh-nhat-the-gioi-co-ban-nang-cap-kho-tin",
+                "source": "vietnam.vn",
+                "summary": "Semiconductor workforce - Final part: Building the capacity to master technology\n\n### Semiconductor workforce - Final part: Building the capacity to master technology\n\nBáo Tin Tức\n2 giờ trước\n\nAnthropic launches two new AI models amid concerns about self-improvement capabilities.\n\n### Anthropic launches two new AI models amid concerns about self-improvement capabilities.\n\nCông Luận\n2 giờ trước\n\nSemiconductor workforce - Part 2: Linking training with business practice [...] ### Semiconductor workforce - Part 2: Linking training with business practice\n\nBáo Tin Tức\n2 giờ trước\n\nSemiconductor Industry Workforce - Part 1: High Demand for Human Resources\n\n### Semiconductor Industry Workforce - Part 1: High Demand for Human Resources\n\nBáo Tin Tức\n2 giờ trước\n\nWhy is Google increasingly making its own AI chips instead of just buying Nvidia GPUs?\n\n### Why is Google increasingly making its own AI chips instead of just buying Nvidia GPUs?\n\nBáo Văn Hóa\n2 giờ trước [...] Vietnam.vn - Nền tảng quảng bá Việt Nam\n\n# The world's most powerful AI has received an incredible upgrade.\n\nThe release of Fable 5.2 and Mythos 5.2 marks a new step in Anthropic's AI strategy, with the ability to handle highly complex programming tasks.\n\nZNewsZNews•10/11/2026\n\n|  |\n\n| Claude Fable 5.2 excels at handling large-scale projects. Photo: Bloomberg . |",
+                "score": 0.3058222
+              },
+              {
+                "title": "Alphamin to Supply Bisie Tin Concentrate to U.S. Smelter - TipRanks.com",
+                "url": "https://www.tipranks.com/news/company-announcements/alphamin-to-supply-bisie-tin-concentrate-to-u-s-smelter",
+                "source": "tipranks.com",
+                "summary": "The agreement gives the U.S. smelter a supply source and broadens Alphamin’s customer base beyond its existing markets. It also supports the development of Western tin-refining capacity and more diversified supply chains for a mineral used in electronics, semiconductors, advanced manufacturing and artificial-intelligence technologies. [...] The most recent analyst rating on (TSE:AFM) stock is a Buy  \nwith a C$2.50 price target.  \nTo see the full list of analyst forecasts on Alphamin Resources stock,  \nsee the TSE:AFM Stock Forecast page.\n\nSpark’s Take on AFM Stock\n\nAccording to Spark, TipRanks’ AI Analyst, AFM is a Outperform. [...] Alphamin Resources has agreed to allocate up to 3,600 tonnes of contained tin annually from its Bisie mine in the Democratic Republic of Congo to Nathan Trotter & Co., a U.S. refiner, for an initial two-year period. The volume represents just under 20% of Bisie’s production, with the mine currently producing about 20,000 tonnes annually.",
+                "score": 0.26263657
+              },
+              {
+                "title": "Minsur stock: USD 22 million plan targets San Rafael tin recovery",
+                "url": "https://www.ad-hoc-news.de/boerse/news/nebenwerte/minsur-stock-usd-22-million-plan-targets-san-rafael-tin-recovery/70483467",
+                "source": "ad-hoc-news.de",
+                "summary": "Minsur stock,  San Rafael mine,  tin mining,  resource recovery,  Peru mining, Illustration mit AI erstellt.\n\nMinsur stock, San Rafael mine, tin mining, resource recovery, Peru mining, Illustration mit AI erstellt.\n\nPeruvian miner Minsur plans to invest USD 22 million in modifications at its San Rafael tin mine in Puno, according to Shanghai Metals Market. The report was published on October 28, 2026, and said Minsur had applied to Senace for certification. [...] ## Nachrichten\n\n Börse\n Wirtschaft\n Politik\n Sport\n Wissenschaft\n Ausland\n Polizei\n Unterhaltung\n International\n Kalenderblatt\n\n## Service\n\n AD HOC NEWSBREAK\n Watchlist\n Börsenlexikon\n RSS\\_Feeds\n Kontakt\n\n## Kursinformationen\n\n positive Kursänderung\n negative Kursänderung\n Keine Kursänderung\n Realtime Realtime\n Zeitverzögert min 15. Minuten\n Schlusskurs Schlusskurs\n\nMenü\n\nNEWS\n\nAKTIENKURSE\n\nBÖRSE\n\nWIRTSCHAFT\n\nPOLITIK\n\nSPORT\n\nUNTERHALTUNG\n\nWISSENSCHAFT\n\nAUSLAND\n\n[]( [...] Bei Akademie registrieren\n\nLogo ad-hoc-news.de\n\nSie befinden sich hier: Startseite > Börse > Nebenwerte > Minsur stock: USD 22 million plan targets San Rafael ...\n\nMinsur stock,  San Rafael mine\n\n# Minsur stock: USD 22 million plan targets San Rafael tin recovery\n\n Published on 11/10/2026 at 01:19 | Editorial responsibility: Rafael Müller, Editor-in-Chief AD HOC NEWS",
+                "score": 0.2382403
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
