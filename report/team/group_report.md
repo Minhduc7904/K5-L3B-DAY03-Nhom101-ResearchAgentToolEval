@@ -167,7 +167,7 @@ Chỉ điền nếu nhóm làm bonus (ghi riêng, tối đa 10 điểm). Tool c�
 |---|---|---|---|
 | Small Local Model | xem B7 |  |  |
 | Hơn 3 tool mới (≥ 4) |  |  |  |
-| `send` gửi thật lên Telegram sau xác nhận | transcript |  |  |
+| `send` gửi thật lên Telegram sau xác nhận | `starter_v0/transcripts/v1_gemini_web_20261110T185836854159.transcript.json` (chạy qua web UI, Gemini, prompt v3-gemini `b3626215b74b`; tên file ghi `v1` do nhãn `--version` khi bật server) | Lượt 1: user yêu cầu tìm 3 tin AI rồi đăng → agent gọi `clarify` (`yes_no`) hỏi xác nhận, chưa gửi. Lượt 2: user trả lời "có" → agent gọi `send(confirmed=true)` → `status: sent`, tin hiện trên kênh private của nhóm | Chỉ gửi sau khi user xác nhận ở lượt sau (rule trong `system_prompt.md` + mô tả `send` trong `tools.yaml`); token và chat ID chỉ nằm trong `.env`, đã kiểm tra transcript không chứa token |
 | Test challenge (0 skipped / regression test) | `pytest` output |  |  |
 
 Test challenge: số bug tìm được trong tool có sẵn (nếu có), cách sửa, và test regression tương ứng.
