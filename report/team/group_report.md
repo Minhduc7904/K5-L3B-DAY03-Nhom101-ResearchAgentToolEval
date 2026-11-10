@@ -64,7 +64,7 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 |---|---|---|---:|---:|---|
 | v0 | baseline | Đo hành vi chưa tối ưu trước khi sửa | n/a | 0.65 (13/20) | `runs/v0_B_base_openai_20261110T172311282476.json` |
 | v1 | system_prompt.md | Bỏ chỉ dẫn xấu (đoán / gửi ngay / một bước), thêm rule `clarify` khi thiếu thông tin và xác nhận trước `send`; không đụng `tools.yaml` | 0.65 | 0.75 (15/20) | `runs/v1_B_base_openai_20261110T175547880942.json` |
-| v2 |  |  |  |  |  |
+| v2 | tools.yaml | Viết rõ khi nào dùng/không dùng cho từng tool; chuẩn hóa convention args (response_type='text'/'yes_no', handle không '@', topic, timeframe) | 0.75 | 0.90 (18/20) | `runs/v2_B_base_gemini_20261110T182232420866.json` |
 | v3 |  |  |  |  |  |
 
 Các chỉ số chi tiết (từ `summary` trong run JSON):
@@ -73,6 +73,15 @@ Các chỉ số chi tiết (từ `summary` trong run JSON):
 |---|---:|---:|---:|---:|---|
 | v0 | 0.65 | 0.70 | 0.65 | 1.000 | R03, R08, R10, R11, R12, R13, R14 |
 | v1 | 0.75 | 0.90 | 0.75 | 0.667 | R10, R11, R12, M02, M06 |
+| v2 | 0.90 | 1.00 | 0.90 | 1.000 | R03, R12 |
+
+Nhận xét v2 (dựa trên run JSON):
+
+- **Độ chính xác tăng vượt bậc từ 75% lên 90% (18/20 case PASS)**.
+- **Tool routing đạt 100% (20/20 case)**: Agent không còn bất kỳ lỗi chọn sai tool nào.
+- **Multiturn accuracy đạt 100%**: Sửa hoàn toàn lỗi hồi quy ở M02 và M06 nhờ phân định rạch ròi phạm vi giữa `lookup` (tìm web) và `social_search` (tìm mạng xã hội).
+- **Sửa thành công R10 và R11**: Model đã điền chính xác `response_type="text"` khi gọi `clarify` nhờ mô tả chi tiết quy ước trong `tools.yaml`.
+- Chỉ còn 2 case chưa hoàn hảo: `R03` (query dư chữ) và `R12` (boundary xác nhận của `send`).
 
 Nhận xét v1 (dựa trên run JSON):
 
