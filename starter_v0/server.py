@@ -148,6 +148,12 @@ def create_app(args: argparse.Namespace) -> FastAPI:
                 }
                 for event in turn.get("tool_events", [])
             ],
+            # Interactive HTML pages from the artifact tool, rendered by the UI in a sandboxed iframe.
+            "artifacts": [
+                event["result"]["artifact"]
+                for event in turn.get("tool_events", [])
+                if isinstance(event.get("result"), dict) and "artifact" in event["result"]
+            ],
         }
 
     if WEB_DIST.exists():

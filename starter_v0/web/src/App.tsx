@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react"
 import Markdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { ArrowUp, ChevronRight, Loader2, RotateCcw, TriangleAlert, Wrench } from "lucide-react"
+import { AppWindow, ArrowUp, ChevronRight, Code, Download, Eye, Loader2, RotateCcw, TriangleAlert, Wrench } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 
 type ToolCall = { name: string; args: Record<string, unknown>; error: boolean }
 
+type Artifact = { id: string; title: string; html: string }
+
 type Message =
   | { role: "user"; text: string }
   | {
@@ -18,6 +20,7 @@ type Message =
       text: string
       status: string
       toolCalls: ToolCall[]
+      artifacts: Artifact[]
       error?: string | null
     }
 
@@ -28,6 +31,7 @@ const EXAMPLES = [
   "Tweet mới nhất của Sam Altman là gì?",
   "Tóm tắt bài viết này hộ mình",
   "Đăng bản tin này lên Telegram giúp mình",
+  "Làm trang tương tác so sánh giá API của GPT, Claude, Gemini",
 ]
 
 export default function App() {
@@ -72,6 +76,7 @@ export default function App() {
           text: data.assistant_text,
           status: data.status,
           toolCalls: data.tool_calls ?? [],
+          artifacts: data.artifacts ?? [],
           error: data.error,
         },
       ])
@@ -83,6 +88,7 @@ export default function App() {
           text: "",
           status: "provider_error",
           toolCalls: [],
+          artifacts: [],
           error: err instanceof Error ? err.message : String(err),
         },
       ])
@@ -236,6 +242,55 @@ function MessageView({ message }: { message: Message }) {
           {message.text}
         </Markdown>
       </div>
+      {message.artifacts.map((a) => (
+        <ArtifactView key={a.id} artifact={a} />
+      ))}
+    </div>
+  )
+}
+
+// Rendered like Claude Artifacts: srcdoc iframe with sandbox="allow-scripts" and no
+// allow-same-origin, so the page's scripts run in an opaque origin and cannot reach
+// this app's DOM, cookies or /api. The tool also adds a CSP that blocks network calls.
+function ArtifactView({ artifact }: { artifact: Artifact }) {
+  const [showCode, setShowCode] = useState(false)
+
+  function download() {
+    const url = URL.createObjectURL(new Blob([artifact.html], { type: "text/html" }))
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${artifact.title.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "") || "artifact"}.html`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border bg-card">
+      <div className="flex items-center justify-between gap-2 border-b px-3 py-1.5">
+        <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
+          <AppWindow className="size-4 shrink-0 text-muted-foreground" />
+          <span className="truncate">{artifact.title}</span>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          <Button variant="ghost" size="xs" onClick={() => setShowCode((v) => !v)}>
+            {showCode ? <Eye /> : <Code />}
+            {showCode ? "Preview" : "Code"}
+          </Button>
+          <Button variant="ghost" size="xs" onClick={download} aria-label="Download HTML">
+            <Download />
+          </Button>
+        </div>
+      </div>
+      {showCode ? (
+        <pre className="h-[480px] overflow-auto bg-muted px-3 py-2 font-mono text-xs">{artifact.html}</pre>
+      ) : (
+        <iframe
+          title={artifact.title}
+          srcDoc={artifact.html}
+          sandbox="allow-scripts"
+          className="block h-[480px] w-full resize-y"
+        />
+      )}
     </div>
   )
 }

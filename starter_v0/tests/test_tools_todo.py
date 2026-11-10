@@ -110,13 +110,62 @@ def test_policy_instruction_like_lines_go_to_untrusted_text() -> None:
 #   2. bad / missing input from the model (empty string, wrong type, out-of-enum value)
 #   3. failure path (missing key, HTTP error, timeout) -> returns error dict, does not raise
 
-def test_my_new_tool_happy_path() -> None:
-    pytest.skip(TODO)
+# ---------------- artifact (group tool) ----------------
+
+artifact_tool = TOOL_FUNCTIONS["artifact"]
 
 
-def test_my_new_tool_bad_input_from_model() -> None:
-    pytest.skip(TODO)
+def test_artifact_wraps_body_in_document_with_csp() -> None:
+    result = artifact_tool(title="So sánh model", html="<table><tr><td>GPT</td></tr></table>")
+    page = result["artifact"]["html"]
+
+    assert result["status"] == "rendered"
+    assert result["artifact"]["title"] == "So sánh model"
+    assert page.startswith("<!doctype html>")
+    assert "<title>So sánh model</title>" in page
+    assert "<table><tr><td>GPT</td></tr></table>" in page
+    assert "connect-src 'none'" in page  # page cannot send data anywhere
+    # CSP must come before the content, or it does not apply to it.
+    assert page.index("Content-Security-Policy") < page.index("<table>")
 
 
-def test_my_new_tool_failure_returns_error_dict() -> None:
-    pytest.skip(TODO)
+def test_artifact_full_document_gets_csp_inside_its_own_head() -> None:
+    doc = "<!DOCTYPE html><html><head><style>b{}</style></head><body><b>x</b></body></html>"
+    page = artifact_tool(title="T", html=doc)["artifact"]["html"]
+
+    assert page.count("<html") == 1  # not wrapped a second time
+    assert page.index("<head>") < page.index("Content-Security-Policy") < page.index("<style>")
+
+
+def test_artifact_header_tag_is_not_mistaken_for_head() -> None:
+    # A <header> in a body fragment must not receive the CSP: in <body> the browser ignores it.
+    page = artifact_tool(title="T", html="<header>Top</header><p>x</p>")["artifact"]["html"]
+    assert page.startswith("<!doctype html>")
+    assert page.index("Content-Security-Policy") < page.index("<header>")
+
+
+def test_artifact_id_is_stable_for_same_content() -> None:
+    a = artifact_tool(title="T", html="<p>x</p>")["artifact"]["id"]
+    b = artifact_tool(title="T", html="<p>x</p>")["artifact"]["id"]
+    c = artifact_tool(title="T", html="<p>y</p>")["artifact"]["id"]
+    assert a == b != c
+
+
+def test_artifact_title_is_escaped_and_defaults_when_missing() -> None:
+    page = artifact_tool(title="</title><script>alert(1)</script>", html="<p>x</p>")["artifact"]["html"]
+    assert "<title>&lt;/title&gt;&lt;script&gt;" in page
+    assert artifact_tool(title="  ", html="<p>x</p>")["artifact"]["title"] == "Artifact"
+    assert artifact_tool(title=None, html="<p>x</p>")["artifact"]["title"] == "Artifact"
+
+
+@pytest.mark.parametrize("bad_html", ["", "   ", None, 123, ["<p>x</p>"]])
+def test_artifact_bad_html_from_model_returns_error_dict(bad_html) -> None:
+    result = artifact_tool(title="T", html=bad_html)
+    assert result["error"] == "EmptyHtml"
+    assert "artifact" not in result
+
+
+def test_artifact_too_large_returns_error_dict() -> None:
+    result = artifact_tool(title="T", html="x" * 200_001)
+    assert result["error"] == "TooLarge"
+    assert "artifact" not in result

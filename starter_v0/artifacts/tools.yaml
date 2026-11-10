@@ -196,3 +196,13 @@ tools:
           default: 8000
           description: "Số ký tự tối đa."
       required: [arxiv_url]
+
+  # ---------------- Group tools (CP3) ----------------
+  - name: artifact
+    description: "Biến câu trả lời thành một trang HTML tương tác, hiển thị ngay trong khung chat (bảng lọc/sắp xếp được, biểu đồ, máy tính nhỏ, timeline). Dùng khi user yêu cầu trang/giao diện/biểu đồ/bảng tương tác, hoặc khi dữ liệu đã có nhiều cột/số liệu cần so sánh trực quan. Không dùng cho câu trả lời ngắn chỉ cần văn bản, không dùng để lấy dữ liệu (lấy dữ liệu bằng tool khác trước). Sau khi gọi, chỉ trả lời 1-2 câu tóm tắt trang vừa tạo, không chép lại HTML."
+    parameters:
+      type: object
+      properties:
+        title: {type: string, default: "", description: "Tiêu đề ngắn của trang, ví dụ 'So sánh giá API LLM'."}
+        html: {type: string, default: "", description: "Nội dung bên trong <body>: HTML kèm <style> và <script> inline, tự chứa, không gọi API/fetch. Thư viện biểu đồ chỉ được tải từ cdn.jsdelivr.net hoặc cdnjs.cloudflare.com. Dữ liệu phải lấy từ tool result hoặc user, không bịa số liệu."}
+      required: [title, html]
