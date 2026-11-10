@@ -18,17 +18,28 @@
 
 > 1–2 câu mô tả agent dùng để làm gì (cho team khác hiểu nhanh).
 
-Ví dụ: "Research agent: tìm tin theo từ khóa / theo tài khoản, đọc URL, tổng hợp thành digest, và gửi lên Telegram khi được xác nhận."
+Research agent giúp tìm tin AI trên web và Twitter/X, đọc bài viết và bài báo khoa học, rồi tóm tắt lại. Agent hỏi lại khi thiếu thông tin, chỉ đăng lên Telegram khi người dùng đã đồng ý, và có thể biến câu trả lời thành một trang web nhỏ bấm được ngay trong khung chat.
 
 **Cách chạy UI:**
 
-> Lệnh chạy UI (ví dụ `streamlit run app.py`) và dependency đã thêm vào `starter_v0/requirements.txt`.
+Giao diện web gồm một máy chủ Python (`starter_v0/server.py`) và trang chat (`starter_v0/web/`). Thư viện cần thêm (`fastapi`, `uvicorn`) đã có trong `starter_v0/requirements.txt`.
+
+```bash
+cd starter_v0
+pip install -r requirements.txt
+(cd web && npm install && npm run build)   # chỉ cần chạy một lần, hoặc sau khi sửa giao diện
+python server.py --provider gemini --version v3
+```
+
+Mở http://localhost:8000. Mỗi phiên chat được tự lưu thành file trong `starter_v0/transcripts/`.
 
 **Link dùng thử (deploy):**
 
 > Dán link public để team khác mở thử ngay. Cách deploy nhanh bằng Cloudflare Tunnel xem README. Nếu deploy Vercel/Streamlit Cloud thì dán link đó.
 >
-> URL:
+> URL: (dán link khi demo)
+
+Cách mở link cho team khác: khi máy chủ đang chạy, mở terminal khác và chạy `cloudflared tunnel --url http://localhost:8000`, rồi gửi link `trycloudflare.com` được in ra.
 
 ### A2. Tool agent có
 
@@ -36,17 +47,27 @@ Ví dụ: "Research agent: tìm tin theo từ khóa / theo tài khoản, đọc 
 
 | Tên tool | Làm được gì | Tool mới nhóm thêm? |
 |---|---|---|
-| clarify | hỏi lại người dùng khi thiếu thông tin | không |
-|  |  |  |
-|  |  |  |
+| clarify | Hỏi lại người dùng khi thiếu thông tin, hoặc xin xác nhận trước khi gửi | không |
+| timeline | Lấy các tweet mới nhất của một tài khoản Twitter/X | không |
+| social_search | Tìm tweet theo từ khóa hoặc chủ đề | không |
+| lookup | Tìm tin tức và bài viết trên web | không |
+| fetch | Đọc nội dung của một đường link cụ thể | không |
+| format | Trình bày các tin đã tìm được thành một bản tin gọn gàng | không |
+| send | Đăng nội dung lên kênh Telegram của nhóm, chỉ khi người dùng đã đồng ý | không |
+| policy | Tra cứu quy định nội bộ của công ty | không |
+| papers | Tìm bài báo khoa học trên arXiv | không |
+| paper_text | Đọc nội dung của một bài báo arXiv | không |
+| artifact | Biến câu trả lời thành một trang web nhỏ bấm được (bảng, biểu đồ, máy tính) hiện ngay trong khung chat | **có** |
 
 ### A3. Câu hỏi mẫu để thử
 
 > 3–5 câu hỏi/yêu cầu mẫu để team khác tự thử agent ngay.
 
-1.
-2.
-3.
+1. Tin tức AI nổi bật hôm nay có gì?
+2. Tóm tắt 5 tweet mới nhất giúp mình (agent sẽ hỏi lại: của tài khoản nào?)
+3. Tìm bài báo mới về retrieval-augmented generation trên arXiv
+4. Làm cho mình một trang tính chi phí API LLM: nhập số token và giá, hiện tổng tiền
+5. Tìm 3 tin AI nổi bật hôm nay rồi đăng lên Telegram giúp mình (agent sẽ hỏi xác nhận trước khi đăng)
 
 ## 3. Giải pháp
 
@@ -163,19 +184,30 @@ Ghi chú:
 
 Lấy từ `starter_v0/transcripts/*.transcript.json`.
 
+Hai phiên chat thật qua giao diện web (Gemini `gemini-3.8-flash`, prompt v3-gemini `b3626215b74b`). Tên file ghi `v1` chỉ vì nhãn `--version` lúc bật máy chủ, không phải prompt v1.
+
+- Phiên 1: `starter_v0/transcripts/v1_gemini_web_20261110T190630989602.transcript.json`
+- Phiên 2: `starter_v0/transcripts/v1_gemini_web_20261110T185836854159.transcript.json`
+
 | Turn | User Request | Tool Calls | Version Evidence | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| Phiên 1, lượt 1 (yêu cầu thường) | Tin tức AI nổi bật hôm nay có gì? | `lookup(query="AI", topic="news", timeframe="day")` | `v1+pb3626215b74b+t6ef9ae1cf8c8` | Đúng tool, đúng tham số. Agent tóm tắt các tin tìm được |
+| Phiên 1, lượt 2 (thiếu thông tin) | Tóm tắt 5 tweet mới nhất giúp mình | `clarify(response_type="text")`: "Bạn muốn xem … từ tài khoản nào?" | như trên | Agent không đoán tài khoản mà hỏi lại |
+| Phiên 1, lượt 3 (bổ sung) | Của Andrej Karpathy nhé | `timeline(screenname="karpathy", limit=5)` | như trên | Agent nhớ "5 tweet" từ lượt trước, đổi tên thành handle `karpathy` (không có `@`) và tóm tắt đúng 5 tweet |
+| Phiên 2, lượt 1 (yêu cầu gửi) | Tìm 3 tin AI nổi bật hôm nay rồi đăng lên Telegram giúp mình | `clarify(response_type="yes_no")` | như trên | Agent hỏi xác nhận, chưa gửi |
+| Phiên 2, lượt 2 (xác nhận) | có | `lookup` → `send(confirmed=true)` | như trên | `status: sent`, tin hiện trên kênh Telegram private của nhóm |
+
+Nhận xét: ở phiên 2, agent hỏi xác nhận trước khi tìm tin, nên người dùng đồng ý khi chưa thấy nội dung. Luồng vẫn đúng yêu cầu (hỏi → đồng ý → gửi), nhưng tốt hơn là cho người dùng xem nội dung trước rồi mới hỏi.
 
 ### B5a. Required Evidence — Tool mới, unit test, UI
 
 | Item | Evidence File | What Worked | Risk / Guardrail |
 |---|---|---|---|
-| Tool mới (`tools/<tên>/`) |  |  |  |
-| Unit test tool mới (≥ 3 test/tool) | `pytest` output (0 failed) |  |  |
-| UI (lệnh chạy + link dùng thử) |  |  |  |
+| Tool mới (`tools/<tên>/`) | `starter_v0/tools/artifact/` (`tool.py`, `TOOL.md`), khai báo trong `tools/__init__.py` và `artifacts/tools.yaml`, commit `06dfa1d` | Model viết nội dung trang, tool bọc thành trang hoàn chỉnh và giao diện hiện nó ngay dưới câu trả lời (có nút Xem trước / Code / Tải về). Chạy thật: Gemini tạo trang tính chi phí API, tính đúng 0,45 USD. Eval nhóm có 4 case cho tool này (G04, G08 nên gọi; G05, G10 không nên gọi), cả 4 đều PASS ở v3 | Trang không được gửi dữ liệu ra ngoài (quy tắc chặn trong trang) và chạy trong khung riêng, không đọc được dữ liệu của trang chat. Đã thử cố đọc trang chat, đọc cookie và gửi dữ liệu ra ngoài: cả ba đều bị chặn |
+| Unit test tool mới (≥ 3 test/tool) | `starter_v0/tests/test_tools_todo.py` (7 test cho `artifact`, chạy 11 trường hợp); `pytest`: 78 passed, 0 failed | Kiểm tra: trường hợp bình thường, model gửi cả trang hoàn chỉnh, thẻ `<header>`, tiêu đề có ký tự lạ, nội dung rỗng hoặc sai kiểu, nội dung quá dài | Mọi lỗi trả về thông báo lỗi, không làm sập chương trình. Test chạy offline, không gọi mạng |
+| UI (lệnh chạy + link dùng thử) | `starter_v0/server.py`, `starter_v0/web/` (commit `a2d2ae3`); lệnh chạy ở mục A1 | Trang chat có câu hỏi mẫu, hiện tool đã gọi và tham số, đánh dấu khi agent chờ người dùng trả lời. Mỗi phiên tự lưu transcript (xem B4) | Lỗi khi gọi model được hiện rõ trên giao diện, không bị che đi. Phần gọi Gemini chưa có giới hạn thời gian chờ, nên khi model chậm thì giao diện có thể đứng ở "Thinking…" khá lâu |
 
-Tool unit tests: số test đã viết, và một ví dụ lỗi mà unit test bắt được nhưng eval không bắt được.
+Tool unit tests: 7 test cho tool `artifact` (11 trường hợp). Ví dụ lỗi mà unit test bắt được nhưng eval không bắt được: lúc đầu tool nhầm thẻ `<header>` với phần đầu trang `<head>`, nên đặt quy tắc chặn sai chỗ và quy tắc mất tác dụng. Eval chỉ kiểm tra model có gọi `artifact` hay không, nên vẫn PASS. Chỉ unit test `test_artifact_header_tag_is_not_mistaken_for_head` mới phát hiện ra lỗi này.
 
 ### B5. Bonus Evidence
 

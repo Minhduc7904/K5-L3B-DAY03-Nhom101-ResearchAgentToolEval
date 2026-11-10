@@ -34,7 +34,7 @@
 - Trên giao diện, mỗi trang hiện thành một thẻ dưới câu trả lời, có nút chuyển giữa **Xem trước** và **Code**, và nút **Tải về** file HTML.
 - Xử lý trường hợp thực tế: dù đã dặn chỉ gửi phần nội dung, model (Gemini) vẫn hay gửi cả trang hoàn chỉnh. Tool nhận ra điều này và chèn quy tắc chặn vào đúng chỗ thay vì bọc thêm một lớp nữa.
 - Khai báo tool trong `artifacts/tools.yaml`, nói rõ khi nào nên dùng (user muốn trang/bảng/biểu đồ tương tác) và khi nào không (câu trả lời ngắn, hoặc chưa có dữ liệu thì phải lấy dữ liệu bằng tool khác trước).
-- Viết 8 unit test trong `tests/test_tools_todo.py`: trường hợp bình thường, model gửi cả trang hoàn chỉnh, tiêu đề chứa ký tự lạ, model gửi nội dung rỗng hoặc sai kiểu, nội dung quá dài. Mọi lỗi đều trả về thông báo lỗi chứ không làm sập chương trình.
+- Viết 7 unit test (chạy 11 trường hợp) trong `tests/test_tools_todo.py`: trường hợp bình thường, model gửi cả trang hoàn chỉnh, tiêu đề chứa ký tự lạ, model gửi nội dung rỗng hoặc sai kiểu, nội dung quá dài. Mọi lỗi đều trả về thông báo lỗi chứ không làm sập chương trình.
 
 ## 4. Bằng chứng
 

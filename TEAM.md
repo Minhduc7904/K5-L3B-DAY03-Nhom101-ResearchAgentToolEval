@@ -13,7 +13,7 @@
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 | Nguyễn Minh Đức | 2A202603751 |  | [Minhduc7904](https://github.com/Minhduc7904) |         |
 |   2 | Đỗ Lý Hoàng Nam | 2A202603777 |  | [DoLyHoangNam](https://github.com/DoLyHoangNam) | Tối ưu Prompt & Tools (CP1, CP2) |
-|   3 | Nguyễn Ngọc Quang | 2A202603773 |  | [shoxieje](https://github.com/shoxieje) |         |
+|   3 | Nguyễn Ngọc Quang | 2A202603773 |  | [shoxieje](https://github.com/shoxieje) | Giao diện web (CP5), tool mới `artifact` (CP3) |
 
 ## Cá nhân
 
@@ -76,7 +76,7 @@ Sao chép mục dưới đây cho từng thành viên.
 ### Đóng góp cụ thể
 
 - Viết máy chủ `starter_v0/server.py` và trang chat `starter_v0/web/`; mỗi phiên chat trên web tự lưu transcript vào `starter_v0/transcripts/`
-- Viết tool `starter_v0/tools/artifact/`, khai báo trong `tools.yaml`, hiển thị trang trong khung an toàn trên giao diện, kèm 8 unit test
+- Viết tool `starter_v0/tools/artifact/`, khai báo trong `tools.yaml`, hiển thị trang trong khung an toàn trên giao diện, kèm 7 unit test
 
 ### Bằng chứng
 
