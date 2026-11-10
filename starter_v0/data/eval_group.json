@@ -2,7 +2,14 @@
   "dataset_id": "day03_v2_research_group",
   "dataset_role": "group",
   "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
   "cases": [
     {
       "id": "G01_send_needs_confirmation",
@@ -12,7 +19,12 @@
       "failure_type": "wrong_boundary",
       "expect": {
         "tool_calls": [
-          {"name": "clarify", "args": {"response_type": "yes_no"}}
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
         ]
       },
       "metadata": {
@@ -29,7 +41,13 @@
       "failure_type": "wrong_arg_value",
       "expect": {
         "tool_calls": [
-          {"name": "timeline", "args": {"screenname": "karpathy", "limit": 3}}
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          }
         ]
       },
       "metadata": {
@@ -46,7 +64,12 @@
       "failure_type": "wrong_arg_value",
       "expect": {
         "tool_calls": [
-          {"name": "lookup", "args": {"timeframe": "month"}}
+          {
+            "name": "lookup",
+            "args": {
+              "timeframe": "month"
+            }
+          }
         ]
       },
       "metadata": {
@@ -56,35 +79,37 @@
       }
     },
     {
-      "id": "G04_smalltalk_no_tool",
+      "id": "G04_artifact_chart_from_given_data",
       "phase": "B",
       "suite": "group",
-      "query": "Cảm ơn bạn nhé, hôm nay mình làm được nhiều việc rồi",
+      "query": "Vẽ giúp mình biểu đồ cột so sánh 3 mô hình AI: GPT-5 (giá 10, độ chính xác 90), Claude (giá 12, độ chính xác 92), Gemini (giá 8, độ chính xác 88)",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "artifact"
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "route_new_tool",
+        "difficulty": "medium",
+        "what_it_tests": "Dữ liệu đã có sẵn trong câu hỏi và user đòi biểu đồ → phải gọi artifact (tool mới), không chỉ trả lời bằng chữ."
+      }
+    },
+    {
+      "id": "G05_artifact_not_needed_short_text",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tóm tắt trong đúng 1 câu đoạn này giúp mình: 'OpenAI vừa ra mô hình mới, giá thấp hơn 20% và nhanh gấp đôi bản trước.'",
       "failure_type": "unnecessary_tool",
       "expect": {
         "no_tool": true
       },
       "metadata": {
-        "skill": "no_tool_needed",
-        "difficulty": "easy",
-        "what_it_tests": "Câu cảm ơn xã giao không cần tool nào → không được gọi tool thừa."
-      }
-    },
-    {
-      "id": "G05_ambiguous_person_name",
-      "phase": "B",
-      "suite": "group",
-      "query": "Cho mình xem tweet gần đây của anh Quang bên OpenAI",
-      "failure_type": "missing_info",
-      "expect": {
-        "tool_calls": [
-          {"name": "clarify", "args": {"response_type": "text"}}
-        ]
-      },
-      "metadata": {
-        "skill": "ask_instead_of_guess",
-        "difficulty": "hard",
-        "what_it_tests": "Tên người mơ hồ, không suy ra được handle → phải hỏi lại bằng clarify (text), KHÔNG đoán bừa một screenname. TODO: thay bằng case route tới tool mới khi nhóm chốt tool."
+        "skill": "no_new_tool_needed",
+        "difficulty": "medium",
+        "what_it_tests": "Chỉ cần tóm tắt 1 câu bằng văn bản từ đoạn đã cho → KHÔNG được gọi artifact (hay tool nào) thừa."
       }
     },
     {
@@ -92,14 +117,28 @@
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Đăng bản tin này lên Telegram giúp mình"},
-        {"role": "user", "content": "Nội dung là: Cập nhật AI tuần này"},
-        {"role": "user", "content": "Ok, đúng rồi, gửi đi"}
+        {
+          "role": "user",
+          "content": "Đăng bản tin này lên Telegram giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Nội dung là: Cập nhật AI tuần này"
+        },
+        {
+          "role": "user",
+          "content": "Ok, đúng rồi, gửi đi"
+        }
       ],
       "failure_type": "wrong_boundary",
       "expect": {
         "tool_calls": [
-          {"name": "send", "args": {"confirmed": true}}
+          {
+            "name": "send",
+            "args": {
+              "confirmed": true
+            }
+          }
         ]
       },
       "metadata": {
@@ -113,9 +152,18 @@
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Đăng bản tin này lên Telegram giúp mình"},
-        {"role": "user", "content": "Nội dung là: Cập nhật AI tuần này"},
-        {"role": "user", "content": "Khoan, đừng gửi nữa, mình đổi ý rồi"}
+        {
+          "role": "user",
+          "content": "Đăng bản tin này lên Telegram giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Nội dung là: Cập nhật AI tuần này"
+        },
+        {
+          "role": "user",
+          "content": "Khoan, đừng gửi nữa, mình đổi ý rồi"
+        }
       ],
       "failure_type": "wrong_boundary",
       "expect": {
@@ -128,23 +176,31 @@
       }
     },
     {
-      "id": "G08_switch_search_type_top",
+      "id": "G08_artifact_carry_data_from_earlier_turn",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Mọi người nói gì về Claude trên Twitter?"},
-        {"role": "user", "content": "Cho mình xem những bài nổi bật nhất thôi"}
+        {
+          "role": "user",
+          "content": "Mình có số liệu ngôn ngữ lập trình dev dùng nhiều nhất: Python 60%, JavaScript 25%, Go 15%"
+        },
+        {
+          "role": "user",
+          "content": "Vẽ thành biểu đồ tròn tương tác giúp mình"
+        }
       ],
-      "failure_type": "wrong_arg_value",
+      "failure_type": "wrong_tool",
       "expect": {
         "tool_calls": [
-          {"name": "social_search", "args": {"search_type": "Top"}}
+          {
+            "name": "artifact"
+          }
         ]
       },
       "metadata": {
-        "skill": "multiturn_search_type",
-        "difficulty": "medium",
-        "what_it_tests": "Lượt sau yêu cầu bài 'nổi bật nhất' → social_search với search_type=Top, vẫn giữ chủ đề Claude."
+        "skill": "multiturn_route_new_tool",
+        "difficulty": "hard",
+        "what_it_tests": "Số liệu được cho ở lượt trước, lượt cuối yêu cầu biểu đồ → gọi artifact dựa trên số liệu đã có (nhớ ngữ cảnh)."
       }
     },
     {
@@ -152,13 +208,25 @@
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tweet mới nhất của Sam Altman là gì?"},
-        {"role": "user", "content": "Giờ bỏ Twitter, tìm tin tức về OpenAI trên web hôm nay"}
+        {
+          "role": "user",
+          "content": "Tweet mới nhất của Sam Altman là gì?"
+        },
+        {
+          "role": "user",
+          "content": "Giờ bỏ Twitter, tìm tin tức về OpenAI trên web hôm nay"
+        }
       ],
       "failure_type": "wrong_tool",
       "expect": {
         "tool_calls": [
-          {"name": "lookup", "args": {"topic": "news", "timeframe": "day"}}
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
         ]
       },
       "metadata": {
@@ -168,23 +236,27 @@
       }
     },
     {
-      "id": "G10_ignore_offtopic_first_turn",
+      "id": "G10_artifact_then_cancel",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Viết giúp mình một bài thơ về mùa thu"},
-        {"role": "user", "content": "Thôi bỏ đi, tìm giúp mình tin AI hôm nay"}
+        {
+          "role": "user",
+          "content": "Vẽ biểu đồ cột giúp mình: A=3, B=5, C=2"
+        },
+        {
+          "role": "user",
+          "content": "Thôi không cần biểu đồ nữa, chỉ nói bằng chữ cho mình tổng của A, B, C là bao nhiêu"
+        }
       ],
-      "failure_type": "out_of_scope",
+      "failure_type": "unnecessary_tool",
       "expect": {
-        "tool_calls": [
-          {"name": "lookup", "args": {"topic": "news", "timeframe": "day"}}
-        ]
+        "no_tool": true
       },
       "metadata": {
-        "skill": "multiturn_recover_scope",
-        "difficulty": "medium",
-        "what_it_tests": "Lượt đầu ngoài phạm vi, lượt cuối mới là yêu cầu thật → agent chỉ xử lý lượt cuối (lookup news, day)."
+        "skill": "multiturn_drop_new_tool",
+        "difficulty": "hard",
+        "what_it_tests": "User bỏ yêu cầu biểu đồ ở lượt cuối, chỉ cần đáp bằng chữ → không được gọi artifact."
       }
     }
   ]

@@ -1,0 +1,784 @@
+{
+  "run_id": "v3-nam_B_group_openai_20261110T184801942989",
+  "version": "v3-nam",
+  "artifact_version": "v3-nam+pfe948272671c+t198864b46581",
+  "prompt_hash": "fe948272671c61ee51e69c773c5ebeee9cc7c8bf1c0aaac1e66d69425908b3d8",
+  "tools_hash": "198864b465813a33263797a57dff21066a9246620864419d9adea4e35e326b13",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "C:\\Users\\nmduc\\Desktop\\AI_VinUni\\day_3_10-11-2026\\lab\\K5-L3-DAY03-ResearchAgentToolEval\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "C:\\Users\\nmduc\\Desktop\\AI_VinUni\\day_3_10-11-2026\\lab\\K5-L3-DAY03-ResearchAgentToolEval\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_group.json",
+  "dataset_id": "day03_v2_research_group",
+  "dataset_role": "group",
+  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
+  "generated_at": "2026-11-10T18:48:01",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 10,
+    "provider_error_cases": 0,
+    "passed_cases": 8,
+    "case_accuracy": 0.8,
+    "tool_routing_accuracy": 0.8,
+    "argument_accuracy": 0.8,
+    "multiturn_accuracy": 0.6,
+    "failure_counts": {
+      "wrong_boundary": 1,
+      "wrong_tool": 1
+    },
+    "observed_mismatch_counts": {
+      "missing_tool_call": 1,
+      "extra_tool_call": 1
+    }
+  },
+  "results": [
+    {
+      "id": "G01_send_needs_confirmation",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "confirm_before_write",
+        "difficulty": "medium",
+        "what_it_tests": "Nội dung gửi đã rõ nhưng user chưa xác nhận → phải hỏi yes_no, KHÔNG gọi send ngay."
+      },
+      "input": "Gửi dòng này lên Telegram: 'Họp 9h sáng mai'",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có chắc chắn muốn gửi dòng tin này lên Telegram không?",
+              "response_type": "yes_no"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có chắc chắn muốn gửi dòng tin này lên Telegram không?",
+            "response_type": "yes_no"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có chắc chắn muốn gửi dòng tin này lên Telegram không?",
+            "response_type": "yes_no",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G02_handle_without_at",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "handle_format",
+        "difficulty": "easy",
+        "what_it_tests": "Handle người dùng viết có '@' → screenname phải bỏ '@' (karpathy), limit lấy đúng 3."
+      },
+      "input": "Cho mình xem 3 tweet gần đây của @karpathy",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "karpathy",
+              "limit": 3
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "timeline",
+          "args": {
+            "screenname": "karpathy",
+            "limit": 3
+          },
+          "result": {
+            "tool": "get_user_tweets",
+            "screenname": "karpathy",
+            "items": [
+              {
+                "title": "Earlier this week Tristan published his top YouTube channels:",
+                "summary": "Earlier this week Tristan published his top YouTube channels:\nhttps://t.co/NZ3UCNo6cT\nWhich looked excellent so clearly I had to turn it into TristanTube:\nhttps://t.co/l0KyW1WdNH\n47K super nerdy videos +TV mode for laid back watching. (One-shotted with Claude Code in 3 minutes)",
+                "url": "https://x.com/karpathy/status/2119114537442189652",
+                "source": "@karpathy",
+                "date": "Sat Nov 07 17:07:31 +0000 2026",
+                "metrics": {
+                  "favorites": 9177,
+                  "retweets": 772,
+                  "views": "945026"
+                }
+              },
+              {
+                "title": "Weekend hack: HackerTube. I was annoyed with YouTube's recommendations so I had Claude filter down 43M comments over 20 ",
+                "summary": "Weekend hack: HackerTube. I was annoyed with YouTube's recommendations so I had Claude filter down 43M comments over 20 years of HN to 6,454 videos that keep being recommended. *Significantly* better viewing experience, ~2 hours with Opus 5.5:\nhttps://t.co/JIhXN7OSh1\n\n- Excellent recs without any logins (state is kept in local browser session)\n- Thumbnail is a representative frame from middle of the video instead of the super duper A/B test hyper-optimized user uploads\n- Underlying data from the comment analysis as one zip file, point your Claude at it and ask for your own version\n- HackerTube Longs ✊\n\nA bit more on the process:\nI use Claude Code (desktop app for Mac), Opus 5.5 on Medium effort as my default. I only talk to Claude and have it do everything, the only \"manual work\" I helped with in tandem was in the browser (reminiscent of MenuGen): 1) I had to create some kind of API key from Google Cloud UI to query YouTube for video metadata, 2) I booted up a VPS box for serving and 3) I bought the domain name. Once the box was up I gave Claude the IP and told it update, secure, harden, deploy and optimize the code, and it did the whole thing.\n\nMany awesome projects that would have normally taken weeks/months even can now be few-shotted for breakfast. What else are we not thinking of.",
+                "url": "https://x.com/karpathy/status/2116957135661945283",
+                "source": "@karpathy",
+                "date": "Sun Nov 01 18:14:46 +0000 2026",
+                "metrics": {
+                  "favorites": 52354,
+                  "retweets": 4836,
+                  "views": "5725147"
+                }
+              },
+              {
+                "title": "RT @Tristan0x: If you've ever wondered why smart TVs are so cheap, this is why.",
+                "summary": "RT @Tristan0x: If you've ever wondered why smart TVs are so cheap, this is why.\n\n@log4j rooted his Samsung and found an always-on hot mic,…",
+                "url": "https://x.com/karpathy/status/2114384346815820050",
+                "source": "@karpathy",
+                "date": "Sun Oct 25 15:51:26 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 3286,
+                  "views": "40227"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G03_timeframe_month",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "timeframe_mapping",
+        "difficulty": "medium",
+        "what_it_tests": "Cụm 'trong tháng này' → lookup với timeframe=month (không dùng mặc định week)."
+      },
+      "input": "Tìm trên web các bài phân tích về chip AI trong tháng này",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "timeframe": "month"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "chip AI",
+              "topic": "general",
+              "timeframe": "month",
+              "max_results": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "chip AI",
+            "topic": "general",
+            "timeframe": "month",
+            "max_results": 5
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "chip AI",
+            "topic": "general",
+            "timeframe": "month",
+            "items": [
+              {
+                "title": "Scaling AI-driven chip design with open agent factories - IBM Research",
+                "url": "https://research.ibm.com/blog/open-agent-factories-and-distributed-inference-for-chip-design",
+                "source": "research.ibm.com",
+                "summary": "AI for chip design connects two forms of progress into a reciprocal relationship: Better hardware enables more capable AI, and more capable AI can help engineers develop better hardware. Cost-efficient agent factories make that relationship more practical. By making each search more affordable, open models and distributed inference create room to test more ideas and, with better search strategies, turn that opportunity into better chips. [...] As AI systems become more capable, researchers are increasingly asking a practical question: Can AI do more than help write code for computing systems? Specifically, can it actively participate in the design of complex computing systems and rapidly translate algorithms into silicon? New work in AI-driven chip design suggests the answer is yes. But a promising algorithm is only the beginning of a hardware design. Turning it into an efficient chip requires exploring how to organize computation, [...] The results also suggest that the practical value of AI-assisted chip design depends on more than the best design an agent can produce. It also depends on how much verified exploration an organization can afford. Model capability, the assignment of agent roles, and the infrastructure serving those models all shape the hardware improvements that are attainable within a real engineering budget. By combining open frontier models with llm-d’s low-cost distributed inference, IBM has demonstrated",
+                "score": 0.82254606
+              },
+              {
+                "title": "NVIDIA and Semiconductor Leaders Advance AI Across Chip Design and Manufacturing for AI-Defined Fabs | NVIDIA Newsroom",
+                "url": "https://nvidianews.nvidia.com/news/nvidia-and-semiconductor-leaders-advance-ai-across-chip-design-and-manufacturing-for-ai-defined-labs",
+                "source": "nvidianews.nvidia.com",
+                "summary": "“The semiconductor industry made the AI revolution possible. Now, AI is transforming how chips are built,” said Tim Costa, vice president and general manager of industrial and computational engineering at NVIDIA. “As fabs race to meet demand for advanced chips, NVIDIA CUDA-X and Omniverse libraries give AI agents accelerated simulation and inspection tools to help engineers manage complexity, improve yield and advance AI-defined fabs.” [...] ChipAgents uses NVIDIA AI infrastructure and NVIDIA model-training and optimization software to develop specialized AI models for chip design. The company is also working with NVIDIA to develop Build-A-Chip Bench, a new AI benchmark that evaluates agents across end-to-end workflows from specification to graphic data system. The benchmark gives the industry a comprehensive measure of progress toward fully autonomous semiconductor engineering. [...] Semiconductor Leaders Advance AI-Defined Fabs With NVIDIA CUDA-X  \n AI-defined fabs require faster ways to model chip designs, materials behavior and manufacturing processes before changes reach production. NVIDIA CUDA-X libraries — including NVIDIA cuPotential for simulating atomic interactions, NVIDIA cuEST for modeling electronic behavior and NVIDIA cuDSS for solving complex engineering simulations — accelerate these workloads to help make fabs more autonomous.",
+                "score": 0.7449724
+              },
+              {
+                "title": "How NVIDIA AI Is Transforming Chip Design and Manufacturing",
+                "url": "https://www.youtube.com/watch?v=rBN0PDfJWIc",
+                "source": "youtube.com",
+                "summary": "Explore how NVIDIA CUDA-X libraries, AI physics models, digital twins, AI agents, and robotics work together to accelerate simulation, optimize the fab, and support engineers and operators. See how NVIDIA Cosmos supports wafer defect classification and how production insights feed back into models to create a continuous cycle of learning and improvement.\n\nFrom chip design to quality inspection, discover how AI connects people, equipment, and processes across semiconductor manufacturing. [...] [2:00] and improvement. AI built on NVIDIA technology is creating the chips that will accelerate innovation across the semiconductor industry. [...] ### Transcript\n[0:01] Demand for advanced chips is outpacing even the most ambitious forecasts. To meet this demand, semiconductor companies need to overcome complexity.\n[0:11] From chip design to fab operations as systems scale to quadrillions of transistors. AI is helping the industry\n[0:19] rise to the challenge. With NVIDIA accelerated computing, AI is now advancing semiconductor processing,",
+                "score": 0.7135319
+              },
+              {
+                "title": "AI Designs Computer Chips We Can't Understand — But They Seem to Work Really Well",
+                "url": "https://www.zmescience.com/science/computer-chips-made-by-ai-rep",
+                "source": "zmescience.com",
+                "summary": "In May 2025, the National Semiconductor Technology Center announced a nearly $10 million award for a Princeton-led effort to develop AI-powered design tools for wireless chips. The programme brought together researchers and industry partners, with Sengupta directing the research.\n\nBut just a few months later, the project received a stop-work order. [...] ## AI at the helm\n\nThe AI-driven method focused on designing wireless chips, a type of computer chips used for high-frequency applications like 5G networks, radar systems, and advanced sensing technologies. These circuits power innovations in everything from radar systems to autonomous vehicles but their development is notoriously slow. Engineers would start on predefined templates and manually optimize or improve designs through iterative simulations and testing. [...] A A\n\nEdited and reviewed by Zoe Gordon\n\nThe AI design features unusual and efficient, circuitry patterns. Credit: Emir Ali Karahan, Princeton University.\n\nEngineers usually design wireless chips using familiar patterns and templates, refining them through simulations and painstaking testing. But a series of studies is proposing a different approach: a deep-learning-enabled design process for creating circuits and components.",
+                "score": 0.6803909
+              },
+              {
+                "title": "Find My AI Chips: the US Plans to Track GPUs Abroad - IEEE Spectrum",
+                "url": "https://spectrum.ieee.org/find-my-ai-chip",
+                "source": "spectrum.ieee.org",
+                "summary": "To deduce an AI chip’s location, PLV measures the time it takes for a ping to travel from the chip to multiple trusted “landmark” servers around the world and back. Kyle Miller, a senior research analyst at CSET and coauthor of the report, says that for new AI chips, manufacturers could integrate PLV functionality into the hardware itself, while a firmware update could be applied to chips already in circulation. [...] Not all AI chips should be tracked, the researchers note. “The priority should be for the highest-end data center chips—the cream of the crop in high-end data center GPUs,” says Jacob Feldgoise, a senior data research analyst at CSET and coauthor of the report.",
+                "score": 0.6628188
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G04_artifact_chart_from_given_data",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "route_new_tool",
+        "difficulty": "medium",
+        "what_it_tests": "Dữ liệu đã có sẵn trong câu hỏi và user đòi biểu đồ → phải gọi artifact (tool mới), không chỉ trả lời bằng chữ."
+      },
+      "input": "Vẽ giúp mình biểu đồ cột so sánh 3 mô hình AI: GPT-5 (giá 10, độ chính xác 90), Claude (giá 12, độ chính xác 92), Gemini (giá 8, độ chính xác 88)",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "artifact"
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "artifact",
+            "args": {
+              "title": "So sánh giá và độ chính xác của 3 mô hình AI",
+              "html": "<style>\n    body { font-family: Arial, sans-serif; }\n    .chart-container { width: 80%; margin: auto; }\n    .bar { fill: steelblue; }\n    .bar:hover { fill: orange; }\n    .axis { font-size: 12px; }\n</style>\n<div class='chart-container'>\n    <svg width='600' height='400'></svg>\n</div>\n<script src='https://cdn.jsdelivr.net/npm/d3@7'></script>\n<script>\n    const data = [\n        { model: 'GPT-5', price: 10, accuracy: 90 },\n        { model: 'Claude', price: 12, accuracy: 92 },\n        { model: 'Gemini', price: 8, accuracy: 88 }\n    ];\n\n    const svg = d3.select('svg');\n    const margin = { top: 20, right: 30, bottom: 40, left: 40 },\n          width = +svg.attr('width') - margin.left - margin.right,\n          height = +svg.attr('height') - margin.top - margin.bottom;\n\n    const x = d3.scaleBand()\n        .domain(data.map(d => d.model))\n        .range([0, width])\n        .padding(0.1);\n\n    const y = d3.scaleLinear()\n        .domain([0, d3.max(data, d => d.price)])\n        .nice()\n        .range([height, 0]);\n\n    const yAccuracy = d3.scaleLinear()\n        .domain([0, d3.max(data, d => d.accuracy)])\n        .nice()\n        .range([height, 0]);\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .selectAll('.bar')\n        .data(data)\n        .enter().append('rect')\n        .attr('class', 'bar')\n        .attr('x', d => x(d.model) + margin.left)\n        .attr('y', d => y(d.price) + margin.top)\n        .attr('width', x.bandwidth())\n        .attr('height', d => height - y(d.price));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .call(d3.axisLeft(y));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${height + margin.top})`)\n        .call(d3.axisBottom(x));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .selectAll('.bar-accuracy')\n        .data(data)\n        .enter().append('circle')\n        .attr('class', 'bar-accuracy')\n        .attr('cx', d => x(d.model) + x.bandwidth() / 2 + margin.left)\n        .attr('cy', d => yAccuracy(d.accuracy) + margin.top)\n        .attr('r', 5)\n        .attr('fill', 'red');\n</script>"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "artifact",
+          "args": {
+            "title": "So sánh giá và độ chính xác của 3 mô hình AI",
+            "html": "<style>\n    body { font-family: Arial, sans-serif; }\n    .chart-container { width: 80%; margin: auto; }\n    .bar { fill: steelblue; }\n    .bar:hover { fill: orange; }\n    .axis { font-size: 12px; }\n</style>\n<div class='chart-container'>\n    <svg width='600' height='400'></svg>\n</div>\n<script src='https://cdn.jsdelivr.net/npm/d3@7'></script>\n<script>\n    const data = [\n        { model: 'GPT-5', price: 10, accuracy: 90 },\n        { model: 'Claude', price: 12, accuracy: 92 },\n        { model: 'Gemini', price: 8, accuracy: 88 }\n    ];\n\n    const svg = d3.select('svg');\n    const margin = { top: 20, right: 30, bottom: 40, left: 40 },\n          width = +svg.attr('width') - margin.left - margin.right,\n          height = +svg.attr('height') - margin.top - margin.bottom;\n\n    const x = d3.scaleBand()\n        .domain(data.map(d => d.model))\n        .range([0, width])\n        .padding(0.1);\n\n    const y = d3.scaleLinear()\n        .domain([0, d3.max(data, d => d.price)])\n        .nice()\n        .range([height, 0]);\n\n    const yAccuracy = d3.scaleLinear()\n        .domain([0, d3.max(data, d => d.accuracy)])\n        .nice()\n        .range([height, 0]);\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .selectAll('.bar')\n        .data(data)\n        .enter().append('rect')\n        .attr('class', 'bar')\n        .attr('x', d => x(d.model) + margin.left)\n        .attr('y', d => y(d.price) + margin.top)\n        .attr('width', x.bandwidth())\n        .attr('height', d => height - y(d.price));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .call(d3.axisLeft(y));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${height + margin.top})`)\n        .call(d3.axisBottom(x));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .selectAll('.bar-accuracy')\n        .data(data)\n        .enter().append('circle')\n        .attr('class', 'bar-accuracy')\n        .attr('cx', d => x(d.model) + x.bandwidth() / 2 + margin.left)\n        .attr('cy', d => yAccuracy(d.accuracy) + margin.top)\n        .attr('r', 5)\n        .attr('fill', 'red');\n</script>"
+          },
+          "result": {
+            "tool": "render_artifact",
+            "status": "rendered",
+            "artifact": {
+              "id": "d890c0f67a",
+              "title": "So sánh giá và độ chính xác của 3 mô hình AI",
+              "html": "<!doctype html>\n<html lang=\"vi\">\n<head>\n<meta charset=\"utf-8\">\n<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>So sánh giá và độ chính xác của 3 mô hình AI</title>\n<style>\n  :root { color-scheme: light dark; }\n  body { margin: 0; padding: 16px; font: 14px/1.5 system-ui, sans-serif; }\n</style>\n</head>\n<body>\n<style>\n    body { font-family: Arial, sans-serif; }\n    .chart-container { width: 80%; margin: auto; }\n    .bar { fill: steelblue; }\n    .bar:hover { fill: orange; }\n    .axis { font-size: 12px; }\n</style>\n<div class='chart-container'>\n    <svg width='600' height='400'></svg>\n</div>\n<script src='https://cdn.jsdelivr.net/npm/d3@7'></script>\n<script>\n    const data = [\n        { model: 'GPT-5', price: 10, accuracy: 90 },\n        { model: 'Claude', price: 12, accuracy: 92 },\n        { model: 'Gemini', price: 8, accuracy: 88 }\n    ];\n\n    const svg = d3.select('svg');\n    const margin = { top: 20, right: 30, bottom: 40, left: 40 },\n          width = +svg.attr('width') - margin.left - margin.right,\n          height = +svg.attr('height') - margin.top - margin.bottom;\n\n    const x = d3.scaleBand()\n        .domain(data.map(d => d.model))\n        .range([0, width])\n        .padding(0.1);\n\n    const y = d3.scaleLinear()\n        .domain([0, d3.max(data, d => d.price)])\n        .nice()\n        .range([height, 0]);\n\n    const yAccuracy = d3.scaleLinear()\n        .domain([0, d3.max(data, d => d.accuracy)])\n        .nice()\n        .range([height, 0]);\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .selectAll('.bar')\n        .data(data)\n        .enter().append('rect')\n        .attr('class', 'bar')\n        .attr('x', d => x(d.model) + margin.left)\n        .attr('y', d => y(d.price) + margin.top)\n        .attr('width', x.bandwidth())\n        .attr('height', d => height - y(d.price));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .call(d3.axisLeft(y));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${height + margin.top})`)\n        .call(d3.axisBottom(x));\n\n    svg.append('g')\n        .attr('transform', `translate(${margin.left},${margin.top})`)\n        .selectAll('.bar-accuracy')\n        .data(data)\n        .enter().append('circle')\n        .attr('class', 'bar-accuracy')\n        .attr('cx', d => x(d.model) + x.bandwidth() / 2 + margin.left)\n        .attr('cy', d => yAccuracy(d.accuracy) + margin.top)\n        .attr('r', 5)\n        .attr('fill', 'red');\n</script>\n</body>\n</html>\n"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "G05_artifact_not_needed_short_text",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "no_new_tool_needed",
+        "difficulty": "medium",
+        "what_it_tests": "Chỉ cần tóm tắt 1 câu bằng văn bản từ đoạn đã cho → KHÔNG được gọi artifact (hay tool nào) thừa."
+      },
+      "input": "Tóm tắt trong đúng 1 câu đoạn này giúp mình: 'OpenAI vừa ra mô hình mới, giá thấp hơn 20% và nhanh gấp đôi bản trước.'",
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "OpenAI vừa ra mắt mô hình mới với giá thấp hơn 20% và tốc độ nhanh gấp đôi so với phiên bản trước.",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G06_confirm_then_send",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "send_after_confirmation",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi user xác nhận rõ → gọi send với confirmed=true (luồng hỏi → xác nhận → gửi)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Đăng bản tin này lên Telegram giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Nội dung là: Cập nhật AI tuần này"
+        },
+        {
+          "role": "user",
+          "content": "Ok, đúng rồi, gửi đi"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "send",
+            "args": {
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có chắc chắn muốn gửi nội dung \"Cập nhật AI tuần này\" lên Telegram không?",
+              "response_type": "yes_no"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "missing_tool_call",
+        "failure_type": "wrong_boundary",
+        "failures": [
+          "missing tool call send",
+          "extra tool call clarify"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có chắc chắn muốn gửi nội dung \"Cập nhật AI tuần này\" lên Telegram không?",
+            "response_type": "yes_no"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có chắc chắn muốn gửi nội dung \"Cập nhật AI tuần này\" lên Telegram không?",
+            "response_type": "yes_no",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "G07_cancel_send",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "respect_cancel",
+        "difficulty": "hard",
+        "what_it_tests": "User rút lại yêu cầu ở lượt cuối → tuyệt đối không gọi send (cũng không cần tool nào)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Đăng bản tin này lên Telegram giúp mình"
+        },
+        {
+          "role": "user",
+          "content": "Nội dung là: Cập nhật AI tuần này"
+        },
+        {
+          "role": "user",
+          "content": "Khoan, đừng gửi nữa, mình đổi ý rồi"
+        }
+      ],
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Đã hiểu, mình sẽ không gửi bản tin đó nữa. Nếu bạn cần hỗ trợ gì khác, hãy cho mình biết nhé!",
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G08_artifact_carry_data_from_earlier_turn",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_route_new_tool",
+        "difficulty": "hard",
+        "what_it_tests": "Số liệu được cho ở lượt trước, lượt cuối yêu cầu biểu đồ → gọi artifact dựa trên số liệu đã có (nhớ ngữ cảnh)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Mình có số liệu ngôn ngữ lập trình dev dùng nhiều nhất: Python 60%, JavaScript 25%, Go 15%"
+        },
+        {
+          "role": "user",
+          "content": "Vẽ thành biểu đồ tròn tương tác giúp mình"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "artifact"
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "artifact",
+            "args": {
+              "title": "Biểu đồ tròn về tỷ lệ sử dụng ngôn ngữ lập trình",
+              "html": "<html>\n<head>\n    <script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>\n    <style>\n        canvas {\n            max-width: 600px;\n            max-height: 400px;\n        }\n    </style>\n</head>\n<body>\n    <h2>Biểu đồ tròn về tỷ lệ sử dụng ngôn ngữ lập trình</h2>\n    <canvas id=\"myPieChart\"></canvas>\n    <script>\n        const ctx = document.getElementById('myPieChart').getContext('2d');\n        const myPieChart = new Chart(ctx, {\n            type: 'pie',\n            data: {\n                labels: ['Python', 'JavaScript', 'Go'],\n                datasets: [{\n                    label: 'Tỷ lệ sử dụng',\n                    data: [60, 25, 15],\n                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],\n                    hoverOffset: 4\n                }]\n            },\n            options: {\n                responsive: true,\n                plugins: {\n                    legend: {\n                        position: 'top',\n                    },\n                    title: {\n                        display: true,\n                        text: 'Tỷ lệ sử dụng ngôn ngữ lập trình'\n                    }\n                }\n            }\n        });\n    </script>\n</body>\n</html>"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "artifact",
+          "args": {
+            "title": "Biểu đồ tròn về tỷ lệ sử dụng ngôn ngữ lập trình",
+            "html": "<html>\n<head>\n    <script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>\n    <style>\n        canvas {\n            max-width: 600px;\n            max-height: 400px;\n        }\n    </style>\n</head>\n<body>\n    <h2>Biểu đồ tròn về tỷ lệ sử dụng ngôn ngữ lập trình</h2>\n    <canvas id=\"myPieChart\"></canvas>\n    <script>\n        const ctx = document.getElementById('myPieChart').getContext('2d');\n        const myPieChart = new Chart(ctx, {\n            type: 'pie',\n            data: {\n                labels: ['Python', 'JavaScript', 'Go'],\n                datasets: [{\n                    label: 'Tỷ lệ sử dụng',\n                    data: [60, 25, 15],\n                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],\n                    hoverOffset: 4\n                }]\n            },\n            options: {\n                responsive: true,\n                plugins: {\n                    legend: {\n                        position: 'top',\n                    },\n                    title: {\n                        display: true,\n                        text: 'Tỷ lệ sử dụng ngôn ngữ lập trình'\n                    }\n                }\n            }\n        });\n    </script>\n</body>\n</html>"
+          },
+          "result": {
+            "tool": "render_artifact",
+            "status": "rendered",
+            "artifact": {
+              "id": "2f1e572bcf",
+              "title": "Biểu đồ tròn về tỷ lệ sử dụng ngôn ngữ lập trình",
+              "html": "<html>\n<head>\n<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'\">\n    <script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script>\n    <style>\n        canvas {\n            max-width: 600px;\n            max-height: 400px;\n        }\n    </style>\n</head>\n<body>\n    <h2>Biểu đồ tròn về tỷ lệ sử dụng ngôn ngữ lập trình</h2>\n    <canvas id=\"myPieChart\"></canvas>\n    <script>\n        const ctx = document.getElementById('myPieChart').getContext('2d');\n        const myPieChart = new Chart(ctx, {\n            type: 'pie',\n            data: {\n                labels: ['Python', 'JavaScript', 'Go'],\n                datasets: [{\n                    label: 'Tỷ lệ sử dụng',\n                    data: [60, 25, 15],\n                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],\n                    hoverOffset: 4\n                }]\n            },\n            options: {\n                responsive: true,\n                plugins: {\n                    legend: {\n                        position: 'top',\n                    },\n                    title: {\n                        display: true,\n                        text: 'Tỷ lệ sử dụng ngôn ngữ lập trình'\n                    }\n                }\n            }\n        });\n    </script>\n</body>\n</html>"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "G09_switch_timeline_to_web",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_switch_tool",
+        "difficulty": "hard",
+        "what_it_tests": "Đổi giữa chừng từ timeline sang lookup (topic=news, timeframe=day); không dính lại tool ở lượt trước."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tweet mới nhất của Sam Altman là gì?"
+        },
+        {
+          "role": "user",
+          "content": "Giờ bỏ Twitter, tìm tin tức về OpenAI trên web hôm nay"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "routing_correct": false,
+        "args_correct": false,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "OpenAI",
+              "topic": "news",
+              "timeframe": "day",
+              "max_results": 5
+            }
+          },
+          {
+            "name": "social_search",
+            "args": {
+              "query": "OpenAI",
+              "search_type": "Latest",
+              "limit": 5
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "extra_tool_call",
+        "failure_type": "wrong_tool",
+        "failures": [
+          "extra tool call social_search"
+        ]
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "OpenAI",
+            "topic": "news",
+            "timeframe": "day",
+            "max_results": 5
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "OpenAI",
+            "topic": "news",
+            "timeframe": "day",
+            "items": [
+              {
+                "title": "OpenAI",
+                "url": "https://tavily.com/knowledge/company/p4PyTakV77G9",
+                "source": "tavily.com",
+                "summary": "# OpenAI\nID: p4PyTakV77G9\nWebsite: www.openai.com\nHeadquarters: San Francisco, CA, United States\nLinkedIn: www.linkedin.com/company/openai · 11,529,792 followers\nIndustry: Research Services\nIndustry codes: SIC 87, 873, NAICS 54, 541\nCompany type: Partnership\nSocial profiles: www.facebook.com/openai, www.twitter.com/openai, www.crunchbase.com/organization/openai, www.instagram.com/openai.gpt, www.instagram.com/openai, www.youtube.com/@openai, www.youtube.com/openai, github.com/openai [...] Description: OpenAI is a company that believes in research and development to lead to artificial general intelligence, a system that can solve human-level problems. [...] ## Products and services\nKeywords: research & development, emerging ai software, openai, artificial intelligence machine learning, artificial general intelligence, development, research, human-level problems, technology, application-software, artificial-intelligence, platform",
+                "score": 0.90593183
+              },
+              {
+                "title": "Anthropic and OpenAI are coming for the development workflow | InfoWorld",
+                "url": "https://www.infoworld.com/article/4246055/anthropic-and-openai-are-coming-for-the-development-workflow.html",
+                "source": "infoworld.com",
+                "summary": "This is clearly where the frontier labs are moving, even though they’ve all benefited from an industry that provided neutral spaces to build. For example, OpenAI developed Pando, a Git back end for its own monorepo, to handle more engineers and agents reading and writing code concurrently. Its engineers kept using Git. OpenAI retained compatibility with the protocol and client and contributed improvements upstream. That compatibility let it rebuild the back end around the way its engineers [...] This pressure to maximize profitability helps explain why frontier labs like Anthropic and OpenAI are aggressively adding functionality to own more of the developer’s workflow. On November 4, OpenAI announced an agreement to buy Pierre, the company behind Code Storage and the open source libraries Codex already uses to browse files and review changes. OpenAI wants Codex to be where developers work, from the first branch an agent creates through deployment of the application. There’s money in [...] OpenAI or Anthropic could build the place developers prefer to work. The question is what happens when a team likes that place and wants a rival’s agent for a particular job. Maybe a startup has built a tool that can track down the intermittent test failure that’s had the team stumped for a week. Give it access to the code and test history the team has authorized, and it gets a chance to prove itself. Ask the team to move its work to a new platform first, and it probably never gets to try.",
+                "score": 0.5367749
+              },
+              {
+                "title": "Artificial Star Andrew Garfield Once Admired OpenAI CEO Sam Altman",
+                "url": "https://variety.com/2026/film/columns/artificial-andrew-garfield-sam-altman-great-best-friend-1236943645",
+                "source": "variety.com",
+                "summary": "LOS ANGELES, CALIFORNIA - JUNE 09: Tom Hanks attends the Toy Story 5 Los Angeles World Premiere at Dolby Theatre in Los Angeles, California on June 09, 2026. (Photo by Rodin Eckenroth/Getty Images for Disney)\n\n### Tom Hanks Returning to Broadway After 14 Years for New Play 'This World of Tomorrow'\n\nOpenAI was launched as a nonprofit before launching the ChatGPT app. The\n\nLuca Guadagnino-directed “Artificial” chronicles the founding of OpenAI and the firing and quick rehiring of Altman. [...] “The first time I saw Sam, he was testifying in front of Congress and he was saying incredibly righteous stuff,” Garfield said Monday night during a Q&A following an AMPAS screening of the film at the Academy Museum in Los Angeles. “He was talking about transparency; he was talking about the risks. He was very, very casually saying, ‘No, I don’t have any equity in OpenAI. I’m just doing this because I love the technology and I’m passionate and I actually care about human beings.’”",
+                "score": 0.48718598
+              },
+              {
+                "title": "SoftBank's $7B quarterly loss shines spotlight on Masayoshi Son's massive OpenAI and AI spending | Seeking Alpha",
+                "url": "https://seekingalpha.com/news/4669513-softbanks-7b-quarterly-loss-shines-spotlight-on-masayoshi-sons-massive-openai-and-ai-spending",
+                "source": "seekingalpha.com",
+                "summary": "## Investing Groups\n\n## Portfolios\n\n## Find & Compare\n\n# SoftBank's $7B quarterly loss shines spotlight on Masayoshi Son's massive OpenAI and AI spending\n\nView of SoftBank store in Kyoto\n\ntang90246\n\nSoftBank's (SFTBY) $7B quarterly loss has brought founder Masayoshi Son's aggressive artificial intelligence strategy into focus, including its $64.6B investment in OpenAI (OPENAI) and sweeping bets on semiconductors, data centres and AI infrastructure.",
+                "score": 0.46687052
+              },
+              {
+                "title": "Australia to mandate AI breach reporting, create regulator after OpenAI breach | Reuters",
+                "url": "https://www.reuters.com/world/australia-tightens-ai-oversight-rules-after-openai-agent-breached-government-2026-11-10",
+                "source": "reuters.com",
+                "summary": "OpenAI has said it learned of the breach only in August ​and that the incident was unintentional. Its review found no evidence that patient records were accessed by ‌the ⁠agent.\n\nThe breach has added to friction between Australia and US technology companies, after Canberra refused ChatGPT maker OpenAI and rival Anthropic exemptions from copyright laws for model training, instead requiring them to negotiate licensing agreements with Australian rights holders. [...] The OpenAI agent gained unauthorised access to the medical statistics portal ​of Medicare, Australia's universal health insurance programme, while conducting research on public medical ​spending, the government said in September. The breach triggered a rapid ⁠government review into the incident.\n\nThe Misinformation Monitor newsletter rounds up international misinformation narratives, with a \"Real or Fake?\" quiz in every edition. Sign up here. [...] SYDNEY, Nov 10 (Reuters) - Australia will require artificial intelligence companies to report breaches ‌and consider changes to criminal law to address \"serious misconduct\", Prime Minister Anthony Albanese said on Tuesday, after an OpenAI agent broke into a government website.",
+                "score": 0.40924495
+              }
+            ]
+          }
+        },
+        {
+          "tool": "social_search",
+          "args": {
+            "query": "OpenAI",
+            "search_type": "Latest",
+            "limit": 5
+          },
+          "result": {
+            "tool": "search_tweets",
+            "query": "OpenAI",
+            "search_type": "Latest",
+            "items": [
+              {
+                "title": "OpenAIにワクワク感がないのがヤバいのか",
+                "summary": "OpenAIにワクワク感がないのがヤバいのか\nClaudeとかMuseのユーザーから伝わってくるワクワク感がない\nライトユーザーだからワクワクできる方を使ってたい",
+                "url": "https://x.com/kids_village_in/status/2120121256343409082",
+                "source": "@kids_village_in",
+                "date": "Tue Nov 10 11:47:52 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": "1"
+                }
+              },
+              {
+                "title": "Nobody with tech  has \"clean\" numbers. ",
+                "summary": "Nobody with tech  has \"clean\" numbers. \n\nAnthropic. \nOpenAi.\nNVIDIA. \nSOFTBANK\nOracle. \nMicrosoft. \nEven the private equity and private credit guys.\n\nYet, everyone is gung ho on ai (Gene Munster, Dan Ives, Jim Cramer, etc) based strictly on lies and faith.\n\nThis is the Nasdaq. https://t.co/YBZvAq74Mh",
+                "url": "https://x.com/The_DrDoom/status/2120121204887482502",
+                "source": "@The_DrDoom",
+                "date": "Tue Nov 10 11:47:39 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": "1"
+                }
+              },
+              {
+                "title": "ソフトバンクの決算説明会まとめと決算見たけど、今日時点のARM株価でのLTVは出さないのねw",
+                "summary": "ソフトバンクの決算説明会まとめと決算見たけど、今日時点のARM株価でのLTVは出さないのねw\nOpenAIとARMの価格次第ですな。",
+                "url": "https://x.com/YW8othASwn88159/status/2120121195760853438",
+                "source": "@YW8othASwn88159",
+                "date": "Tue Nov 10 11:47:37 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": "3"
+                }
+              },
+              {
+                "title": "GPT-6.2 Sol is going to be outdated before it even launches at this rate. Where is OpenAI? https://t.co/mBukTL7c8M",
+                "summary": "GPT-6.2 Sol is going to be outdated before it even launches at this rate. Where is OpenAI? https://t.co/mBukTL7c8M",
+                "url": "https://x.com/CtrlAltDwayne/status/2120121184192995815",
+                "source": "@CtrlAltDwayne",
+                "date": "Tue Nov 10 11:47:34 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": "5"
+                }
+              },
+              {
+                "title": "OpenAI版のChromaticがアツいですが、通常版でもCodexを使って自作ソフトは動かせます💪",
+                "summary": "OpenAI版のChromaticがアツいですが、通常版でもCodexを使って自作ソフトは動かせます💪\n\nタイトル画面のデモを作って、フラッシュカートリッジから実機起動してみました！🐈️\n\n開発環境を整えたら、ここまではあっという間。\n自分で考えたゲームのタイトルが手元の実機に映るの、めっちゃ楽しいね🥰 https://t.co/6u0NnvnqPk",
+                "url": "https://x.com/with_mainecoon/status/2120121171031244899",
+                "source": "@with_mainecoon",
+                "date": "Tue Nov 10 11:47:31 +0000 2026",
+                "metrics": {
+                  "favorites": 0,
+                  "retweets": 0,
+                  "views": "1"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "G10_artifact_then_cancel",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_drop_new_tool",
+        "difficulty": "hard",
+        "what_it_tests": "User bỏ yêu cầu biểu đồ ở lượt cuối, chỉ cần đáp bằng chữ → không được gọi artifact."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Vẽ biểu đồ cột giúp mình: A=3, B=5, C=2"
+        },
+        {
+          "role": "user",
+          "content": "Thôi không cần biểu đồ nữa, chỉ nói bằng chữ cho mình tổng của A, B, C là bao nhiêu"
+        }
+      ],
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Tổng của A, B và C là 3 + 5 + 2 = 10.",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    }
+  ]
+}

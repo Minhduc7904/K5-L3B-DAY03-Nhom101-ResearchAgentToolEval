@@ -65,7 +65,7 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 | v0 | baseline | Đo hành vi chưa tối ưu trước khi sửa | n/a | 0.65 (13/20) | `runs/v0_B_base_openai_20261110T172311282476.json` |
 | v1 | system_prompt.md | Bỏ chỉ dẫn xấu (đoán / gửi ngay / một bước), thêm rule `clarify` khi thiếu thông tin và xác nhận trước `send`; không đụng `tools.yaml` | 0.65 | 0.75 (15/20) | `runs/v1_B_base_openai_20261110T175547880942.json` |
 | v2 | tools.yaml (viết lại mô tả nhiều tool, xem ghi chú) | `tools.yaml` mơ hồ (không nói khi nào dùng/không dùng, thiếu quy ước `response_type`, `topic`, handle) là nguyên nhân lỗi còn lại của v1. **Lưu ý: thay đổi gộp nhiều tool, không phải một giả thuyết đơn lẻ** | 0.75 | 0.95 (19/20) | `runs/v2_B_base_openai_20261110T183148819703.json` |
-| v3 |  |  |  |  |  |
+| v3 | system_prompt.md | Viết lại prompt (ý tưởng v3 của Nam) với **4 thay đổi gộp**: `clarify` dùng `response_type="text"` khi thiếu thông tin; rule `query` (giữ từ khóa gốc, không đưa "news"/thời gian vào `query`); luồng xác nhận `send` (hỏi `yes_no`, gửi `confirmed=true` sau khi user xác nhận rõ, hủy thì không gửi); trả lời thẳng khi ngoài phạm vi. Bỏ câu chép từ eval. Không phải một giả thuyết đơn lẻ | 0.95 | 0.95 (19/20) | `runs/v3_B_base_openai_20261110T184941408701.json` |
 
 Các chỉ số chi tiết (từ `summary` trong run JSON):
 
@@ -74,6 +74,7 @@ Các chỉ số chi tiết (từ `summary` trong run JSON):
 | v0 | 0.65 | 0.70 | 0.65 | 1.000 | R03, R08, R10, R11, R12, R13, R14 |
 | v1 | 0.75 | 0.90 | 0.75 | 0.667 | R10, R11, R12, M02, M06 |
 | v2 (OpenAI) | 0.95 | 1.00 | 0.95 | 1.000 | R12 |
+| v3 (OpenAI) | 0.95 | 0.95 | 0.95 | 1.000 | R10 |
 
 Nhận xét v2 (dựa trên run JSON `v2_B_base_openai_20261110T183148819703.json`, OpenAI gpt-4o-mini, cùng model với v0 và v1):
 
@@ -83,6 +84,19 @@ Nhận xét v2 (dựa trên run JSON `v2_B_base_openai_20261110T183148819703.jso
 - Rủi ro đo lường: một số ví dụ trong mô tả `tools.yaml` (tên người, URL, chủ đề) trùng nội dung `data/eval_base.json`, nên điểm base của v2 có thể cao hơn thực lực. Cần dùng bộ `eval_group.json` (case do nhóm tự viết) để kiểm tra chéo.
 - Run Gemini của Nam (`v0_B_base_gemini_...`, `v2_B_base_gemini_...`, model `gemini-3.5-flash-lite`) chỉ để tham khảo, **không dùng trong chuỗi v0→v3** vì khác model với v0/v1. Gemini v2 đạt 0.90 (18/20), FAIL R03, R12; Gemini v0 đạt 0.65.
 - Hash `tools_hash` của cùng một nội dung `tools.yaml` khác nhau giữa các máy (`474f8a0277b2` trên máy Đức, `eb21b1702350` trên máy Nam) vì khác kết thúc dòng CRLF/LF, không phải khác nội dung.
+
+Nhận xét v3 (OpenAI gpt-4o-mini; prompt `718f89bc937b`; base: `v3_B_base_openai_20261110T184941408701.json`, group: `v3_B_group_openai_20261110T185010179172.json`):
+
+- Base: 19/20 (0.95), routing 0.95, multiturn 1.00, `provider_error_cases=0`, `measured_cases=20`. Sửa được R12 (trước đó v2 hỏi `text` thay vì `yes_no`) nhưng **R10 hồi quy** (prompt v2 và prompt gốc của Nam đều PASS R10; nguyên nhân chưa kiểm chứng, mới chỉ có 1 run mỗi cấu hình nên chưa phân biệt được với nhiễu mẫu): với "Tóm tắt 5 tweet mới nhất giúp mình", agent gọi `social_search(query="tweet")` thay vì `clarify`. Vì vậy `case_accuracy` **không tăng** so với v2 (0.95 → 0.95).
+- Group (10 case nhóm): 9/10 (0.90). Chỉ G09 FAIL: ở lượt cuối agent gọi đúng `lookup(topic=news, timeframe=day)` nhưng gọi **thêm** `social_search`.
+- **Đối chứng `v2-artifact`** (prompt v2 + `tools.yaml` đã có `artifact`, chạy bộ group, run `v2-artifact_B_group_openai_20261110T184249362732.json`): **10/10**, G06 và G09 đều PASS. Nghĩa là trên bộ group, prompt v3 (9/10) và bản gốc của Nam (8/10) **không tốt hơn** prompt v2 cùng tools; G09 là hồi quy do prompt v3, không phải điểm yếu có sẵn. Chưa có run base cho cấu hình `v2-artifact`, nên phần base vẫn lẫn ảnh hưởng của tool `artifact`.
+- Chưa thể kết luận v3 tốt hơn v2: (1) mẫu nhỏ, một run; (2) `tools.yaml` đã có thêm tool `artifact` của Quang (tools_hash `198864b46581`) so với v2 (`474f8a0277b2`), nên không hoàn toàn like-for-like.
+- So sánh với bản v3 gốc của Nam chạy trên cùng OpenAI (prompt `fe948272671c`, run `v3-nam_B_base_openai_20261110T184712292671.json` và `v3-nam_B_group_openai_20261110T184801942989.json`): base **1.00 (20/20)** nhưng group chỉ **0.80 (8/10)**. Hai case FAIL là G06 (đã được user xác nhận rõ mà agent vẫn hỏi lại `clarify` thay vì `send(confirmed=true)`) và G09. Prompt gốc chép nguyên văn câu của case R12 ("Đăng bản tin này lên Telegram...") cùng các ví dụ `"AI"`, `"tuần này"` trong prompt, và rule "luôn hỏi yes_no" khiến luồng xác nhận gửi bị hỏi lại. Chênh lệch base 1.00 so với group 0.80 là **dấu hiệu** bản gốc tune theo bộ base nhưng chưa chứng minh (chênh 1–2 case, một run mỗi bên; cả hai bản v3 đều FAIL G09 mà prompt v2 qua được).
+- Bản v3 chính thức của nhóm là bản đã viết lại (không chép từ eval, có rule không hỏi lại sau xác nhận rõ ràng): G06 PASS nhưng R10 và G09 vẫn là điểm yếu, dự kiến xử lý ở v4.
+- Lưu ý bộ case: lượt đầu của G06, G07 trùng nguyên văn câu của R12 và lượt đầu của G09 trùng R01 (chỉ một lượt, không phải cả case). Run `v1_B_group_openai_...` dùng phiên bản cũ của bộ group (có case G05 tên mơ hồ) nên không so sánh trực tiếp với các run group sau này.
+- Hash phụ thuộc kết thúc dòng: `system_prompt.md` ghi LF trên đĩa nhưng git có thể chuyển CRLF khi checkout trên Windows, nên `prompt_hash` có thể đổi theo máy dù nội dung giống nhau; nên thêm `.gitattributes` (`* text eol=lf`) ở vòng sau.
+- Hạn chế đã biết: case R12 mong `clarify(yes_no)` ngay khi user chưa đưa nội dung. Hành vi đúng thực tế có thể là hỏi nội dung trước; ta chấp nhận để khớp bộ base, ghi lại đây như một giới hạn của cách chấm.
+- Run Gemini của Nam (`v3_B_base_gemini_20261110T183600784007.json`: base 1.00, metric_before 0.90 của Gemini v2) chỉ để tham khảo, không nằm trong chuỗi so sánh vì khác model.
 
 Nhận xét v1 (dựa trên run JSON):
 
@@ -106,6 +120,18 @@ Run v0: `starter_v0/runs/v0_B_base_openai_20261110T172311282476.json` (gpt-4o-mi
 | R10_missing_handle | missing_info | `timeline(screenname="sama")` | Không có handle trong request nhưng agent tự đoán `sama` thay vì `clarify` | `system_prompt.md`: thiếu tham số bắt buộc thì gọi `clarify`, không đoán |
 | R11_missing_url | missing_info | `fetch(url="https://example.com/article")` | Không có URL nhưng agent bịa URL thay vì `clarify` | Giống R10 |
 | R12_confirm_before_send | wrong_boundary | `send(text="Bản tin mới nhất đã được cập nhật!")` | Gửi ngay mà chưa xin xác nhận | `system_prompt.md` + mô tả `send` trong `tools.yaml`: chỉ gửi khi user đã xác nhận (`confirmed=true`), nếu chưa thì `clarify` |
+
+Trạng thái các case FAIL của v0 sau v3 (OpenAI, base `v3_B_base_openai_20261110T184941408701.json`):
+
+| Case ID | v0 | v1 | v2 | v3 | Ghi chú |
+|---|---|---|---|---|---|
+| R03_web_news_routing | FAIL | PASS | PASS | PASS | `query` giữ từ khóa gốc nhờ rule query |
+| R13_parallel_web_and_tweets | FAIL | PASS | PASS | PASS | |
+| R08_out_of_scope | FAIL | PASS | PASS | PASS | PASS vì không gọi tool; agent vẫn trả lời thẳng, cần review thủ công |
+| R14_out_of_scope_coding | FAIL | PASS | PASS | PASS | như R08 |
+| R10_missing_handle | FAIL | FAIL | PASS | **FAIL** | v1: thiếu `response_type`; v3: gọi `social_search(query="tweet")` thay vì `clarify` (hồi quy) |
+| R11_missing_url | FAIL | FAIL | PASS | PASS | |
+| R12_confirm_before_send | FAIL | FAIL | FAIL | PASS | v2: hỏi `text` thay vì `yes_no` |
 
 ### B3. Team Eval Cases
 
