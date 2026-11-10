@@ -59,12 +59,15 @@ Sao chép mục dưới đây cho từng thành viên.
 
 ### Phần việc phụ trách
 
--
+- Giao diện web cho agent (CP5)
+- Tool mới `artifact`: biến câu trả lời thành trang web tương tác hiển thị ngay trong khung chat (CP3)
 
 ### Đóng góp cụ thể
 
--
+- Viết máy chủ `starter_v0/server.py` và trang chat `starter_v0/web/`; mỗi phiên chat trên web tự lưu transcript vào `starter_v0/transcripts/`
+- Viết tool `starter_v0/tools/artifact/`, khai báo trong `tools.yaml`, hiển thị trang trong khung an toàn trên giao diện, kèm 8 unit test
 
 ### Bằng chứng
 
--
+- Commit `a2d2ae3` (giao diện web), `06dfa1d` (tool `artifact`)
+- Báo cáo cá nhân: `report/team/2A202603773_NguyenNgocQuang.md`
