@@ -11,7 +11,7 @@
 
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
-|   1 | Nguyễn Minh Đức | 2A202603751 |  | [Minhduc7904](https://github.com/Minhduc7904) |         |
+|   1 | Nguyễn Minh Đức | 2A202603751 |  | [Minhduc7904](https://github.com/Minhduc7904) | Baseline v0, v1; chạy lại v2/v3 trên OpenAI; eval nhóm (CP4); demo và báo cáo nhóm |
 |   2 | Đỗ Lý Hoàng Nam | 2A202603777 |  | [DoLyHoangNam](https://github.com/DoLyHoangNam) | Tối ưu Prompt & Tools (CP1, CP2) |
 |   3 | Nguyễn Ngọc Quang | 2A202603773 |  | [shoxieje](https://github.com/shoxieje) | Giao diện web (CP5), tool mới `artifact` (CP3) |
 
@@ -31,15 +31,23 @@ Sao chép mục dưới đây cho từng thành viên.
 
 ### Phần việc phụ trách
 
--
+- Baseline `v0` hợp lệ trên OpenAI gpt-4o-mini và phân tích lỗi (CP1); vòng `v1` sửa `system_prompt.md` (CP2).
+- Chạy lại `v2` và viết lại `v3` trên cùng model OpenAI để cả chuỗi `v0 → v3` so sánh được (CP2).
+- Viết 10 case eval của nhóm `data/eval_group.json` và bảng B3 (CP4).
+- Mở link dùng thử bằng Cloudflare Tunnel, chat thử với v3, điền các mục còn lại của `group_report.md` (CP5).
 
 ### Đóng góp cụ thể
 
--
+- Chạy preflight, `pytest`, base eval `v0` (0.65) và phân loại 7 case FAIL (bảng B2); `v1` đạt 0.75.
+- Phát hiện chuỗi version bị lẫn hai model (OpenAI và Gemini) và bản v3 gốc có dấu hiệu tune theo bộ base (base 20/20 nhưng group 8/10); chạy lại `v2` (0.95), viết lại `v3` (base 0.95, group 0.90) trên OpenAI, thêm run đối chứng `v2-artifact`.
+- Viết `data/eval_group.json` (5 single + 5 multi turn, trong đó 4 case cho tool `artifact`), điền B3.
+- Ba phiên chat thật với v3 trên link Cloudflare, quét khóa API trước khi commit; điền A1, mục 3, B4, B5, mục 5, B6, mục 8 của báo cáo nhóm.
 
 ### Bằng chứng
 
--
+- Commit `7917383` (CP1), `5e17791` (v1), `f658144` và `72a563b` (v2, v3 trên OpenAI, eval nhóm), `fc7de23` (B3), `c049372` (báo cáo nhóm, transcript v3).
+- Run: `starter_v0/runs/v0_B_base_openai_20261110T172311282476.json`, `v1_B_base_openai_20261110T175547880942.json`, `v2_B_base_openai_20261110T183148819703.json`, `v3_B_base_openai_20261110T184941408701.json`, `v3_B_group_openai_20261110T185010179172.json`.
+- Báo cáo cá nhân: `report/team/2A202603751_NguyenMinhDuc.md`.
 
 ## DoLyHoangNam-2A202603777
 
