@@ -135,11 +135,29 @@ Trạng thái các case FAIL của v0 sau v3 (OpenAI, base `v3_B_base_openai_202
 
 ### B3. Team Eval Cases
 
-Liệt kê đúng 10 case trong `starter_v0/data/eval_group.json` (5 single turn + 5 multi turn).
+Bộ 10 case trong `starter_v0/data/eval_group.json` (5 single turn: G01–G05; 5 multi turn: G06–G10), chạy bằng `--suite group` trên OpenAI gpt-4o-mini. Cột Result lấy từ:
+- **v3** (bản chính thức): `starter_v0/runs/v3_B_group_openai_20261110T185010179172.json` — 9/10 (0.90).
+- **v3 gốc của Nam** (đối chiếu): `starter_v0/runs/v3-nam_B_group_openai_20261110T184801942989.json` — 8/10 (0.80).
+- **v2-artifact** (đối chứng: prompt v2 + tools có `artifact`): `starter_v0/runs/v2-artifact_B_group_openai_20261110T184249362732.json` — 10/10 (1.00).
 
-| Case ID | What It Tests | Expected Tool/Behavior | Result |
-|---|---|---|---|
-|  |  |  |  |
+| Case ID | What It Tests | Expected Tool/Behavior | Result v3 | Result v3 gốc (Nam) | Result v2-artifact |
+|---|---|---|---|---|---|
+| G01_send_needs_confirmation (single) | Nội dung gửi đã rõ nhưng user chưa xác nhận → phải hỏi yes_no, KHÔNG gọi send ngay. | `clarify(response_type=yes_no)`, không gọi `send` | **PASS** | PASS | PASS |
+| G02_handle_without_at (single) | Handle người dùng viết có '@' → screenname phải bỏ '@' (karpathy), limit lấy đúng 3. | `timeline(screenname="karpathy", limit=3)` | **PASS** | PASS | PASS |
+| G03_timeframe_month (single) | Cụm 'trong tháng này' → lookup với timeframe=month (không dùng mặc định week). | `lookup(timeframe="month")` | **PASS** | PASS | PASS |
+| G04_artifact_chart_from_given_data (single) | Dữ liệu đã có sẵn trong câu hỏi và user đòi biểu đồ → phải gọi artifact (tool mới), không chỉ trả lời bằng chữ. | `artifact` (tool mới) | **PASS** | PASS | PASS |
+| G05_artifact_not_needed_short_text (single) | Chỉ cần tóm tắt 1 câu bằng văn bản từ đoạn đã cho → KHÔNG được gọi artifact (hay tool nào) thừa. | Không gọi tool | **PASS** | PASS | PASS |
+| G06_confirm_then_send (multi) | Sau khi user xác nhận rõ → gọi send với confirmed=true (luồng hỏi → xác nhận → gửi). | `send(confirmed=true)` | **PASS** | FAIL | PASS |
+| G07_cancel_send (multi) | User rút lại yêu cầu ở lượt cuối → tuyệt đối không gọi send (cũng không cần tool nào). | Không gọi tool | **PASS** | PASS | PASS |
+| G08_artifact_carry_data_from_earlier_turn (multi) | Số liệu được cho ở lượt trước, lượt cuối yêu cầu biểu đồ → gọi artifact dựa trên số liệu đã có (nhớ ngữ cảnh). | `artifact` (tool mới) | **PASS** | PASS | PASS |
+| G09_switch_timeline_to_web (multi) | Đổi giữa chừng từ timeline sang lookup (topic=news, timeframe=day); không dính lại tool ở lượt trước. | `lookup(topic="news", timeframe="day")`, không gọi thêm tool khác | **FAIL** | FAIL | PASS |
+| G10_artifact_then_cancel (multi) | User bỏ yêu cầu biểu đồ ở lượt cuối, chỉ cần đáp bằng chữ → không được gọi artifact. | Không gọi tool | **PASS** | PASS | PASS |
+
+Ghi chú:
+- Tool mới `artifact` (do Quang viết) được kiểm tra bởi 4 case: G04 và G08 (nên gọi), G05 và G10 (không nên gọi).
+- Case FAIL của v3: **G09** — lượt cuối gọi đúng `lookup(topic=news, timeframe=day)` nhưng gọi thêm `social_search`. Prompt v2 cùng tools qua được G09 nên đây là hồi quy do prompt v3. Hướng xử lý: giả thuyết riêng cho một version sau (chỉ xử lý yêu cầu ở lượt cuối), cùng với R10.
+- Bản v3 gốc của Nam còn FAIL **G06**: user đã xác nhận rõ nhưng agent hỏi `clarify` lại thay vì `send(confirmed=true)`; bộ group bắt được lỗi mà bộ base (20/20) không bắt được.
+- Hạn chế: lượt đầu của G06, G07 trùng câu của case R12 và lượt đầu của G09 trùng câu của R01 trong `eval_base.json` (chỉ một lượt, không phải cả case); harness gộp các lượt thành một tin nhắn và chỉ chấm lượt cuối; một run mỗi cấu hình nên chưa loại trừ nhiễu mẫu. Run `v1_B_group_openai_...` dùng phiên bản cũ của bộ case nên không dùng để so sánh.
 
 ### B4. Live Chat Evidence
 
