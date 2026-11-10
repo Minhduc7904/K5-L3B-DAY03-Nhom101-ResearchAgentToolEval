@@ -8,5 +8,8 @@ PyYAML>=6.0
 pypdf>=4.0.0
 # UI (Streamlit):
 streamlit>=1.30.0
+# Web UI backend (server.py):
+fastapi>=0.110
+uvicorn>=0.29
 # Tool unit tests:
 pytest>=8.0.0
