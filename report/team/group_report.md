@@ -63,9 +63,23 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 | Version | Changed Artifact | Hypothesis | Metric Before | Metric After | Run File |
 |---|---|---|---:|---:|---|
 | v0 | baseline | Đo hành vi chưa tối ưu trước khi sửa | n/a | 0.65 (13/20) | `runs/v0_B_base_openai_20261110T172311282476.json` |
-| v1 |  |  |  |  |  |
+| v1 | system_prompt.md | Bỏ chỉ dẫn xấu (đoán / gửi ngay / một bước), thêm rule `clarify` khi thiếu thông tin và xác nhận trước `send`; không đụng `tools.yaml` | 0.65 | 0.75 (15/20) | `runs/v1_B_base_openai_20261110T175547880942.json` |
 | v2 |  |  |  |  |  |
 | v3 |  |  |  |  |  |
+
+Các chỉ số chi tiết (từ `summary` trong run JSON):
+
+| Version | case_accuracy | tool_routing | argument | multiturn | Case FAIL |
+|---|---:|---:|---:|---:|---|
+| v0 | 0.65 | 0.70 | 0.65 | 1.000 | R03, R08, R10, R11, R12, R13, R14 |
+| v1 | 0.75 | 0.90 | 0.75 | 0.667 | R10, R11, R12, M02, M06 |
+
+Nhận xét v1 (dựa trên run JSON):
+
+- Sửa được R03, R08, R13, R14. R08 và R14 chỉ "PASS" vì không còn gọi tool; agent vẫn trả lời thẳng bài toán/code thay vì từ chối, harness không phân biệt được nên cần review thủ công.
+- Giả thuyết ban đầu "sẽ sửa R10, R11, R12" **không đúng**: ba case này đã gọi đúng `clarify` (không còn đoán hay gửi ngay) nhưng vẫn FAIL vì model bỏ trống `response_type` (case mong `text` / `yes_no`). Đây là lỗi quy ước tham số thuộc `tools.yaml`, sẽ xử lý ở v2.
+- Prompt v1 gộp nhiều thay đổi (đổi persona, bỏ đoán, thêm rule `clarify`, bỏ "gửi ngay / một bước"); R03 và R13 được sửa dù prompt không nói về `topic` / `query`, nên chưa thể kết luận do giả thuyết hay do nhiễu.
+- Hai case multi-turn M02 và M06 hồi quy (từ PASS sang FAIL): model gọi `social_search` thay vì `lookup`. **Chưa kiểm chứng nguyên nhân**; giả thuyết là mô tả `lookup` / `social_search` mơ hồ, có thể bị đẩy thêm bởi rule "never assume". Mẫu nhỏ (1 run, 6 case multi-turn).
 
 ### B2. Failure Analysis
 
@@ -75,7 +89,7 @@ Run v0: `starter_v0/runs/v0_B_base_openai_20261110T172311282476.json` (gpt-4o-mi
 
 | Case ID | Failure Type | Actual Tool Calls | What Failed | Fix |
 |---|---|---|---|---|
-| R03_web_news_routing | wrong_tool | `lookup(query="AI news", topic="news", timeframe="day")` | `query` thừa chữ "news" (expected `AI`) | `tools.yaml`: tin tức đi vào `topic=news`, không đưa "news" vào `query` |
+| R03_web_news_routing | wrong_arg_value (harness gán `wrong_tool`; tool đúng, chỉ `query` sai) | `lookup(query="AI news", topic="news", timeframe="day")` | `query` thừa chữ "news" (expected `AI`) | `tools.yaml`: tin tức đi vào `topic=news`, không đưa "news" vào `query` |
 | R13_parallel_web_and_tweets | wrong_tool | `lookup(query="AI news")` + `timeline(sama)` | Thiếu `topic=news`, query thừa "news", gọi `timeline` thay vì `social_search`, thiếu `social_search` | `tools.yaml`: phân biệt `timeline` (theo tài khoản) và `social_search` (theo từ khóa); thêm rule routing trong prompt |
 | R08_out_of_scope | out_of_scope | `send(text="Nguyên hàm của x^2 ...")` | Câu hỏi toán ngoài phạm vi mà agent vẫn gọi `send` | `system_prompt.md`: từ chối/trả lời ngoài phạm vi, không gọi tool |
 | R14_out_of_scope_coding | out_of_scope | `send(text="Dưới đây là hàm Fibonacci ...")` | Yêu cầu viết code ngoài phạm vi mà agent vẫn gọi `send` | Giống R08 |
