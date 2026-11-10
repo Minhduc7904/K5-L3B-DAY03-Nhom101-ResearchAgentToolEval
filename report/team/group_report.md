@@ -8,9 +8,9 @@
 
 ## 1. Thông tin nhóm
 
-- Tên nhóm:
+- Tên nhóm: nhóm 101
 - Thành viên và phân công: xem [TEAM.md](../../TEAM.md)
-- Provider/model dùng cho v0–v3:
+- Provider/model dùng cho v0–v3: OpenAI / gpt-4o-mini
 
 ## 2. Mục tiêu và cách tiếp cận — PHẦN A: Giới thiệu agent
 
@@ -62,7 +62,7 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 
 | Version | Changed Artifact | Hypothesis | Metric Before | Metric After | Run File |
 |---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |
+| v0 | baseline | Đo hành vi chưa tối ưu trước khi sửa | n/a | 0.65 (13/20) | `runs/v0_B_base_openai_20261110T172311282476.json` |
 | v1 |  |  |  |  |  |
 | v2 |  |  |  |  |  |
 | v3 |  |  |  |  |  |
@@ -71,9 +71,17 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 
 Lấy từ `results[*].result.failures` trong run JSON.
 
+Run v0: `starter_v0/runs/v0_B_base_openai_20261110T172311282476.json` (gpt-4o-mini, 20 case, `provider_error_cases=0`, `measured_cases=20`). Fix là kế hoạch cho v1–v3, chưa kiểm chứng.
+
 | Case ID | Failure Type | Actual Tool Calls | What Failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| R03_web_news_routing | wrong_tool | `lookup(query="AI news", topic="news", timeframe="day")` | `query` thừa chữ "news" (expected `AI`) | `tools.yaml`: tin tức đi vào `topic=news`, không đưa "news" vào `query` |
+| R13_parallel_web_and_tweets | wrong_tool | `lookup(query="AI news")` + `timeline(sama)` | Thiếu `topic=news`, query thừa "news", gọi `timeline` thay vì `social_search`, thiếu `social_search` | `tools.yaml`: phân biệt `timeline` (theo tài khoản) và `social_search` (theo từ khóa); thêm rule routing trong prompt |
+| R08_out_of_scope | out_of_scope | `send(text="Nguyên hàm của x^2 ...")` | Câu hỏi toán ngoài phạm vi mà agent vẫn gọi `send` | `system_prompt.md`: từ chối/trả lời ngoài phạm vi, không gọi tool |
+| R14_out_of_scope_coding | out_of_scope | `send(text="Dưới đây là hàm Fibonacci ...")` | Yêu cầu viết code ngoài phạm vi mà agent vẫn gọi `send` | Giống R08 |
+| R10_missing_handle | missing_info | `timeline(screenname="sama")` | Không có handle trong request nhưng agent tự đoán `sama` thay vì `clarify` | `system_prompt.md`: thiếu tham số bắt buộc thì gọi `clarify`, không đoán |
+| R11_missing_url | missing_info | `fetch(url="https://example.com/article")` | Không có URL nhưng agent bịa URL thay vì `clarify` | Giống R10 |
+| R12_confirm_before_send | wrong_boundary | `send(text="Bản tin mới nhất đã được cập nhật!")` | Gửi ngay mà chưa xin xác nhận | `system_prompt.md` + mô tả `send` trong `tools.yaml`: chỉ gửi khi user đã xác nhận (`confirmed=true`), nếu chưa thì `clarify` |
 
 ### B3. Team Eval Cases
 
