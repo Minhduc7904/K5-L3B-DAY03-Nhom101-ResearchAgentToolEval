@@ -206,3 +206,58 @@ tools:
         title: {type: string, default: "", description: "Tiêu đề ngắn của trang, ví dụ 'So sánh giá API LLM'."}
         html: {type: string, default: "", description: "Nội dung bên trong <body>: HTML kèm <style> và <script> inline, tự chứa, không gọi API/fetch. Thư viện biểu đồ chỉ được tải từ cdn.jsdelivr.net hoặc cdnjs.cloudflare.com. Dữ liệu phải lấy từ tool result hoặc user, không bịa số liệu."}
       required: [title, html]
+
+  - name: cite
+    description: "Tạo chuỗi trích dẫn (APA, IEEE hoặc BibTeX) cho MỘT nguồn đã biết thông tin. DÙNG KHI: người dùng yêu cầu trích dẫn, tạo reference/citation/BibTeX cho một bài báo hoặc bài viết mà tiêu đề (và tác giả, năm, link nếu có) đã có trong câu hỏi hoặc trong kết quả tool trước. KHÔNG DÙNG KHI: chưa có thông tin nguồn (hãy tìm bằng papers/lookup/fetch trước), hoặc người dùng chỉ cần tóm tắt nội dung. Không tự bịa tác giả hay năm."
+    parameters:
+      type: object
+      properties:
+        title: {type: string, default: "", description: "Tiêu đề nguồn, giữ nguyên như đã biết."}
+        authors:
+          type: array
+          default: []
+          items: {type: string}
+          description: "Danh sách tên tác giả (để trống nếu không biết, không bịa)."
+        year: {type: integer, description: "Năm xuất bản 4 chữ số (bỏ qua nếu không biết)."}
+        url: {type: string, default: "", description: "Đường dẫn đầy đủ tới nguồn (nếu có)."}
+        style:
+          type: string
+          enum: [apa, ieee, bibtex]
+          default: "apa"
+          description: "Kiểu trích dẫn: 'apa' (mặc định), 'ieee' hoặc 'bibtex' khi người dùng nhắc tới BibTeX/LaTeX."
+      required: [title]
+
+  - name: dedupe
+    description: "Loại bỏ các kết quả trùng lặp trong một danh sách bài viết/tweet đã thu thập. DÙNG KHI: đã có danh sách item (title, url) lấy từ nhiều lần tìm kiếm và người dùng muốn lọc trùng, bỏ bài lặp. KHÔNG DÙNG KHI: chưa có danh sách item nào (hãy tìm trước bằng lookup/social_search/timeline), hoặc chỉ cần định dạng bản tin (dùng format)."
+    parameters:
+      type: object
+      properties:
+        items:
+          type: array
+          default: []
+          description: "Danh sách item cần lọc trùng, mỗi item có title và/hoặc url."
+          items:
+            type: object
+            properties:
+              title: {type: string}
+              url: {type: string}
+              source: {type: string}
+              summary: {type: string}
+        key:
+          type: string
+          enum: [url, title]
+          default: "url"
+          description: "So sánh trùng theo 'url' (mặc định) hay theo 'title' khi người dùng nói trùng tiêu đề."
+      required: [items]
+
+  - name: text_stats
+    description: "Đếm ký tự, số từ, thời gian đọc ước tính của một đoạn văn bản và kiểm tra có vượt giới hạn độ dài không (mặc định 280 ký tự của một tweet). DÙNG KHI: người dùng đưa ra một đoạn văn bản cụ thể và hỏi nó dài bao nhiêu từ/ký tự, có vừa một tweet hay vượt giới hạn không. KHÔNG DÙNG KHI: người dùng không đưa văn bản nào (hỏi lại bằng clarify), hoặc chỉ yêu cầu tóm tắt/viết lại văn bản."
+    parameters:
+      type: object
+      properties:
+        text: {type: string, default: "", description: "Đoạn văn bản cần đếm, giữ nguyên như người dùng đưa."}
+        limit:
+          type: integer
+          default: 280
+          description: "Giới hạn ký tự cần so sánh (mặc định 280; đổi khi người dùng nêu giới hạn khác)."
+      required: [text]

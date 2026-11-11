@@ -42,6 +42,8 @@ Sao chép mục dưới đây cho từng thành viên.
 - Phát hiện chuỗi version bị lẫn hai model (OpenAI và Gemini) và bản v3 gốc có dấu hiệu tune theo bộ base (base 20/20 nhưng group 8/10); chạy lại `v2` (0.95), viết lại `v3` (base 0.95, group 0.90) trên OpenAI, thêm run đối chứng `v2-artifact`.
 - Viết `data/eval_group.json` (5 single + 5 multi turn, trong đó 4 case cho tool `artifact`), điền B3.
 - Ba phiên chat thật với v3 trên link Cloudflare, quét khóa API trước khi commit; điền A1, mục 3, B4, B5, mục 5, B6, mục 8 của báo cáo nhóm.
+- Vòng v4/v5 xử lý R10 và G09 (R10 có khả năng đã sửa, G09 chưa); phiên chat gửi Telegram thật trên OpenAI (`status: sent`).
+- Bonus (có hỗ trợ của Claude Code): thêm 3 tool `cite`, `dedupe`, `text_stats` (tool nhóm viết thành 4 cùng `artifact`) kèm `data/eval_bonus_tools.json` và run v6; thay đủ 14 stub trong `tests/test_tools_todo.py` (`pytest` 0 skipped) và sửa bug tool `send` (`confirmed="false"` vẫn gửi) kèm regression test. Không làm bonus Small Local Model vì máy không chạy được Ollama.
 
 ### Bằng chứng
 

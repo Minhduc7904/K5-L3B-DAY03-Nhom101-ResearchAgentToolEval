@@ -1,0 +1,111 @@
+{
+  "dataset_id": "day03_v2_research_bonus_tools",
+  "dataset_role": "extension",
+  "description": "Case kiểm tra 3 tool mới của nhóm (cite, dedupe, text_stats): mỗi tool có case nên gọi và case không nên gọi. Chạy riêng bằng --eval-cases data/eval_bonus_tools.json --suite extension; không thay thế eval_base.json hay eval_group.json.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "T01_cite_apa_from_given_metadata",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Tạo trích dẫn APA cho bài 'Attention Is All You Need' của Vaswani và cộng sự, năm 2017, link https://arxiv.org/abs/1706.03762",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "cite", "args": {"style": "apa"}}]},
+      "metadata": {"skill": "route_cite", "difficulty": "easy", "what_it_tests": "Đã có đủ tiêu đề, tác giả, năm, link và user yêu cầu trích dẫn APA → gọi cite (style=apa), không tìm lại bằng papers."}
+    },
+    {
+      "id": "T02_cite_bibtex_style",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Cho mình entry BibTeX của bài 'BERT: Pre-training of Deep Bidirectional Transformers' (Devlin, 2019), link https://arxiv.org/abs/1810.04805",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "cite", "args": {"style": "bibtex"}}]},
+      "metadata": {"skill": "cite_style_mapping", "difficulty": "medium", "what_it_tests": "Cụm 'BibTeX' → cite với style=bibtex (không dùng mặc định apa)."}
+    },
+    {
+      "id": "T03_cite_missing_source",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Trích dẫn bài báo đó giúp mình",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_before_cite", "difficulty": "medium", "what_it_tests": "Không nói rõ bài nào, chưa có thông tin nguồn → hỏi lại bằng clarify, không đoán tiêu đề hay tác giả để cite."}
+    },
+    {
+      "id": "T04_dedupe_given_list",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Lọc trùng giúp mình danh sách này: 1) 'Tin AI mới' https://a.com/x?utm_source=fb 2) 'Tin AI mới' https://a.com/x 3) 'Tin khác' https://b.com/y",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "dedupe"}]},
+      "metadata": {"skill": "route_dedupe", "difficulty": "medium", "what_it_tests": "Danh sách item đã có sẵn, user yêu cầu lọc trùng → gọi dedupe."}
+    },
+    {
+      "id": "T05_dedupe_not_needed_for_single_search",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Tìm tin tức về robot hình người trên web trong tuần này",
+      "failure_type": "unnecessary_tool",
+      "expect": {"tool_calls": [{"name": "lookup", "args": {"topic": "news", "timeframe": "week"}}]},
+      "metadata": {"skill": "no_dedupe_without_list", "difficulty": "medium", "what_it_tests": "Chỉ cần một lần tìm kiếm, chưa có danh sách nào để lọc → chỉ gọi lookup, không gọi dedupe thừa."}
+    },
+    {
+      "id": "T06_text_stats_given_text",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Đoạn này có vượt 280 ký tự không: 'Nhóm 101 vừa hoàn thành bài lab Research Agent, gồm baseline, bốn vòng tối ưu prompt, tool mới và giao diện chat. Mong mọi người dùng thử và góp ý để nhóm cải thiện thêm.'",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "text_stats"}]},
+      "metadata": {"skill": "route_text_stats", "difficulty": "easy", "what_it_tests": "User đưa đoạn văn và hỏi có vượt 280 ký tự → gọi text_stats thay vì tự đếm bằng chữ."}
+    },
+    {
+      "id": "T07_text_stats_missing_text",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Đếm giúp mình số từ của đoạn văn",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_before_text_stats", "difficulty": "medium", "what_it_tests": "Không có đoạn văn nào để đếm → hỏi lại bằng clarify, không gọi text_stats với text rỗng hay bịa."}
+    },
+    {
+      "id": "T08_text_stats_not_for_summary",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Tóm tắt trong đúng 1 câu đoạn này giúp mình: 'Công ty vừa công bố mô hình mới, độ chính xác tăng 5% và chi phí giảm một nửa so với phiên bản trước.'",
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true},
+      "metadata": {"skill": "no_text_stats_for_summary", "difficulty": "medium", "what_it_tests": "Chỉ yêu cầu tóm tắt, không hỏi độ dài → không gọi text_stats (hay tool nào) thừa."}
+    },
+    {
+      "id": "T09_multiturn_text_stats_after_text_given",
+      "phase": "B",
+      "suite": "extension",
+      "turns": [
+        {"role": "user", "content": "Mình soạn tweet này: 'Hôm nay nhóm 101 chốt xong bài lab, cảm ơn mọi người đã góp ý!'"},
+        {"role": "user", "content": "Nó có vừa giới hạn 280 ký tự không?"}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "text_stats"}]},
+      "metadata": {"skill": "multiturn_route_text_stats", "difficulty": "hard", "what_it_tests": "Văn bản được đưa ở lượt trước, lượt cuối hỏi độ dài → gọi text_stats với đoạn văn đã có (nhớ ngữ cảnh)."}
+    },
+    {
+      "id": "T10_multiturn_cite_after_source_given",
+      "phase": "B",
+      "suite": "extension",
+      "turns": [
+        {"role": "user", "content": "Mình vừa đọc bài 'Language Models are Few-Shot Learners' của Brown và cộng sự, năm 2020"},
+        {"role": "user", "content": "Cho mình citation APA của bài đó"}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "cite", "args": {"style": "apa"}}]},
+      "metadata": {"skill": "multiturn_route_cite", "difficulty": "hard", "what_it_tests": "Thông tin nguồn nằm ở lượt trước, lượt cuối yêu cầu citation → gọi cite dựa trên thông tin đã có, không tìm lại."}
+    }
+  ]
+}

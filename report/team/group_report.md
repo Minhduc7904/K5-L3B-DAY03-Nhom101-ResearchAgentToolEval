@@ -58,6 +58,9 @@ Cách mở link cho team khác: khi máy chủ đang chạy, mở terminal khác
 | papers | Tìm bài báo khoa học trên arXiv | không |
 | paper_text | Đọc nội dung của một bài báo arXiv | không |
 | artifact | Biến câu trả lời thành một trang web nhỏ bấm được (bảng, biểu đồ, máy tính) hiện ngay trong khung chat | **có** |
+| cite | Tạo trích dẫn APA, IEEE hoặc BibTeX cho một nguồn đã biết thông tin | **có** |
+| dedupe | Lọc bỏ các kết quả trùng lặp trong danh sách bài viết/tweet đã thu thập | **có** |
+| text_stats | Đếm ký tự, số từ, thời gian đọc và kiểm tra có vượt giới hạn 280 ký tự của một tweet không | **có** |
 
 ### A3. Câu hỏi mẫu để thử
 
@@ -99,6 +102,7 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 | v3 | system_prompt.md | Viết lại prompt (ý tưởng v3 của Nam) với **4 thay đổi gộp**: `clarify` dùng `response_type="text"` khi thiếu thông tin; rule `query` (giữ từ khóa gốc, không đưa "news"/thời gian vào `query`); luồng xác nhận `send` (hỏi `yes_no`, gửi `confirmed=true` sau khi user xác nhận rõ, hủy thì không gửi); trả lời thẳng khi ngoài phạm vi. Bỏ câu chép từ eval. Không phải một giả thuyết đơn lẻ | 0.95 | 0.95 (19/20) | `runs/v3_B_base_openai_20261110T184941408701.json` |
 | v4 | system_prompt.md (đúng 1 rule thêm vào prompt v3) | Rule "chỉ xử lý yêu cầu ở lượt cuối, các lượt trước chỉ là ngữ cảnh; user đổi nguồn thì chỉ gọi tool của yêu cầu mới" sẽ sửa G09 và R10. **Giả thuyết bị bác bỏ** | 0.95 | 0.95 / 1.00 / 0.95 (3 run base); group 0.90 / 0.90 | `runs/v4_B_base_openai_20261111T091656874586.json` (các run khác trong `version_log.csv`) |
 | v5 | system_prompt.md (đúng 1 rule thêm vào prompt v4) | Rule "mỗi nhu cầu thông tin chỉ gọi đúng 1 tool tìm kiếm, trừ khi user nói rõ muốn nhiều nguồn" sẽ sửa cả G09 và R10. **R10 có khả năng đã được sửa, G09 chưa** | 0.95 | 1.00 / 1.00 (2 run base); group 0.90 / 0.90 | `runs/v5_B_base_openai_20261111T092218638603.json` (các run khác trong `version_log.csv`) |
+| v6 | tools.yaml (thêm 3 tool mới `cite`, `dedupe`, `text_stats`; prompt giữ bản v5) | Thêm 3 tool offline với mô tả "DÙNG KHI / KHÔNG DÙNG KHI" rõ ràng không làm hồi quy bộ base/group và model route đúng tới tool mới. **Giả thuyết được ủng hộ** (trong phạm vi 2 run mỗi cấu hình) | 1.00 | 1.00 / 1.00 (2 run base); group 0.90 / 1.00; bộ tool mới 10/10 và 10/10 | `runs/v6_B_base_openai_20261111T094823111724.json` (các run khác trong `version_log.csv`) |
 
 Các chỉ số chi tiết (từ `summary` trong run JSON):
 
@@ -110,8 +114,9 @@ Các chỉ số chi tiết (từ `summary` trong run JSON):
 | v3 (OpenAI) | 0.95 | 0.95 | 0.95 | 1.000 | R10 |
 | v4 (OpenAI, 3 run) | 0.95 / 1.00 / 0.95 | 0.95 / 1.00 / 0.95 | 0.95 / 1.00 / 0.95 | 1.000 | R10 (2/3 run) |
 | v5 (OpenAI, 2 run) | 1.00 / 1.00 | 1.00 / 1.00 | 1.00 / 1.00 | 1.000 | không có |
+| v6 (OpenAI, 2 run) | 1.00 / 1.00 | 1.00 / 1.00 | 1.00 / 1.00 | 1.000 | không có |
 
-Bộ group (10 case): v3 0.90 (G09 FAIL); v4 0.90 / 0.90 (G09 FAIL cả 2 run); v5 0.90 / 0.90 (G09 FAIL cả 2 run). Mỗi run có `provider_error_cases=0`, `measured_cases` bằng `total_cases`.
+Bộ group (10 case): v3 0.90 (G09 FAIL); v4 0.90 / 0.90 (G09 FAIL cả 2 run); v5 0.90 / 0.90 (G09 FAIL cả 2 run); v6 0.90 / 1.00 (G09 FAIL 1/2 run). Mỗi run có `provider_error_cases=0`, `measured_cases` bằng `total_cases`.
 
 **Vòng v4 → v5 (chạy sau khi nộp bản đầu, một giả thuyết mỗi version).**
 
@@ -119,6 +124,8 @@ Bộ group (10 case): v3 0.90 (G09 FAIL); v4 0.90 / 0.90 (G09 FAIL cả 2 run); 
 - v5 (rule "một nhu cầu, một tool tìm kiếm"): base 20/20 ở cả 2 lần, R10 PASS 2/2 (v4 chỉ PASS 1/3, v3 FAIL 1/1), R13 (cần gọi cả web và tweet) vẫn PASS nhờ ngoại lệ "user nói rõ muốn nhiều nguồn". **G09 vẫn FAIL 2/2**, vẫn gọi thêm `social_search` sau `lookup`. R10 có khả năng đã được sửa nhưng 2 lần chạy chưa đủ để chắc chắn vì R10 dao động giữa các lần chạy.
 - Giả thuyết cho vòng sau: rule `query` của v3 nhắc `lookup` và `social_search` trong cùng một câu nên có thể kéo model gọi cả hai; prompt v2 (không có rule này) PASS G09. Chưa thử.
 - Đây là kết quả trung thực: G09 chưa được xử lý sau 2 version. Hai run base mỗi cấu hình vẫn là mẫu nhỏ.
+- **Rà soát độc lập phần bonus** (một agent chấm riêng, chạy lại `pytest`) tìm ra 2 bug thật trong tool nhóm viết, đã sửa kèm regression test, không đổi `tools.yaml` nên hash v6 không đổi: `dedupe` bỏ sót chữ `đ`/`Đ` nên "Đà Nẵng" và "À Nẵng" bị coi là trùng, và các tiêu đề không có chữ latin (tiếng Trung, "!!!") đều chuẩn hóa thành chuỗi rỗng nên bị xóa; `cite` tạo sai khóa BibTeX với tên dạng "Họ, Tên" và lặp dấu chấm khi tiêu đề đã kết thúc bằng dấu chấm.
+- **v6 (thêm 3 tool mới, bonus).** Tools hash đổi (`198864b46581` → `5fe1e927e2f8`), prompt giữ nguyên v5. Base 20/20 ở cả 2 lần (không hồi quy); group 0.90 rồi 1.00 (G09 FAIL 1/2 lần, PASS 1/2 lần nên G09 dao động theo lần chạy, chưa thể nói đã sửa); bộ `data/eval_bonus_tools.json` (10 case: nên gọi và không nên gọi cho cả 3 tool) đạt 10/10 ở cả 2 lần. Hạn chế: bộ 10 case do chính nhóm viết cùng lúc với mô tả tool nên có thể bị thổi phồng; mỗi cấu hình chỉ 2 run.
 
 Nhận xét v2 (dựa trên run JSON `v2_B_base_openai_20261110T183148819703.json`, OpenAI gpt-4o-mini, cùng model với v0 và v1):
 
@@ -257,7 +264,10 @@ Nhận xét: ở phiên 2 (Gemini), agent hỏi xác nhận trước khi tìm ti
 | Item | Evidence File | What Worked | Risk / Guardrail |
 |---|---|---|---|
 | Tool mới (`tools/<tên>/`) | `starter_v0/tools/artifact/` (`tool.py`, `TOOL.md`), khai báo trong `tools/__init__.py` và `artifacts/tools.yaml`, commit `06dfa1d` | Model viết nội dung trang, tool bọc thành trang hoàn chỉnh và giao diện hiện nó ngay dưới câu trả lời (có nút Xem trước / Code / Tải về). Chạy thật: Gemini tạo trang tính chi phí API, tính đúng 0,45 USD. Eval nhóm có 4 case cho tool này (G04, G08 nên gọi; G05, G10 không nên gọi), cả 4 đều PASS ở v3 | Trang không được gửi dữ liệu ra ngoài (quy tắc chặn trong trang) và chạy trong khung riêng, không đọc được dữ liệu của trang chat. Đã thử cố đọc trang chat, đọc cookie và gửi dữ liệu ra ngoài: cả ba đều bị chặn |
-| Unit test tool mới (≥ 3 test/tool) | `starter_v0/tests/test_tools_todo.py` (7 test cho `artifact`, chạy 11 trường hợp); `pytest`: 78 passed, 0 failed | Kiểm tra: trường hợp bình thường, model gửi cả trang hoàn chỉnh, thẻ `<header>`, tiêu đề có ký tự lạ, nội dung rỗng hoặc sai kiểu, nội dung quá dài | Mọi lỗi trả về thông báo lỗi, không làm sập chương trình. Test chạy offline, không gọi mạng |
+| Tool mới (bonus): `cite` | `starter_v0/tools/cite/` (`tool.py`, `TOOL.md`), đăng ký trong `tools/__init__.py`, khai báo trong `artifacts/tools.yaml`; eval case T01–T03, T10 trong `starter_v0/data/eval_bonus_tools.json` | Tạo trích dẫn APA, IEEE, BibTeX từ metadata model đưa vào; không bịa tác giả hay năm (thiếu thì ghi `Unknown author` / `n.d.`) | Lỗi `MissingTitle`, `UnknownStyle`, `InvalidAuthors` trả về dict, không raise |
+| Tool mới (bonus): `dedupe` | `starter_v0/tools/dedupe/`; eval case T04, T05 | Lọc trùng theo URL đã chuẩn hóa (bỏ `utm_*`, `www.`, fragment, dấu `/` cuối) hoặc theo tiêu đề; giữ mục đầu và thứ tự | Lỗi `UnknownKey`, `InvalidItems` trả về dict; mục không có gì để so sánh được giữ lại |
+| Tool mới (bonus): `text_stats` | `starter_v0/tools/text_stats/`; eval case T06–T09 | Đếm ký tự, từ, thời gian đọc và cờ vượt 280 ký tự (model đếm ký tự không đáng tin) | Lỗi `EmptyText`, `TooLong`, `InvalidLimit` trả về dict |
+| Unit test tool mới (≥ 3 test/tool) | `starter_v0/tests/test_tools_todo.py`: 7 test cho `artifact` (11 trường hợp), 7 test cho `cite`, 9 cho `dedupe`, 5 cho `text_stats`; `pytest`: **151 passed, 0 skipped, 0 failed** | Kiểm tra: trường hợp bình thường, đầu vào xấu từ model (rỗng, sai kiểu, ngoài enum), nhánh lỗi trả `error` dict | Mọi lỗi trả về thông báo lỗi, không làm sập chương trình. Test chạy offline, không gọi mạng |
 | UI (lệnh chạy + link dùng thử) | `starter_v0/server.py`, `starter_v0/web/` (commit `a2d2ae3`); lệnh chạy ở mục A1 | Trang chat có câu hỏi mẫu, hiện tool đã gọi và tham số, đánh dấu khi agent chờ người dùng trả lời. Mỗi phiên tự lưu transcript (xem B4) | Lỗi khi gọi model được hiện rõ trên giao diện, không bị che đi. Phần gọi Gemini chưa có giới hạn thời gian chờ, nên khi model chậm thì giao diện có thể đứng ở "Thinking…" khá lâu |
 
 Tool unit tests: 7 test cho tool `artifact` (11 trường hợp). Ví dụ lỗi mà unit test bắt được nhưng eval không bắt được: lúc đầu tool nhầm thẻ `<header>` với phần đầu trang `<head>`, nên đặt quy tắc chặn sai chỗ và quy tắc mất tác dụng. Eval chỉ kiểm tra model có gọi `artifact` hay không, nên vẫn PASS. Chỉ unit test `test_artifact_header_tag_is_not_mistaken_for_head` mới phát hiện ra lỗi này.
@@ -268,16 +278,16 @@ Chỉ điền nếu nhóm làm bonus (ghi riêng, tối đa 10 điểm). Tool c�
 
 | Bonus | Evidence File | What Worked | Risk / Guardrail |
 |---|---|---|---|
-| Small Local Model | xem B7 | Không thực hiện | Chưa chạy model Ollama nào |
-| Hơn 3 tool mới (≥ 4) | — | Không đạt: nhóm chỉ viết 1 tool mới (`artifact`) | — |
+| Small Local Model | xem B7 | Không thực hiện | Máy của nhóm không chạy được model local (Ollama), nên bỏ bonus này |
+| Hơn 3 tool mới (≥ 4) | `starter_v0/tools/artifact/` (Quang), `starter_v0/tools/cite/`, `starter_v0/tools/dedupe/`, `starter_v0/tools/text_stats/` (3 tool bonus, Đức viết có hỗ trợ của Claude Code); mỗi tool có `TOOL.md`, đăng ký trong `tools/__init__.py` và `tools.yaml`; eval case trong `data/eval_group.json` (artifact) và `data/eval_bonus_tools.json` (3 tool còn lại); run `v6_B_extension_openai_*.json` | 4 tool do nhóm tự viết, mỗi tool ≥ 3 test, mỗi tool có case nên gọi và không nên gọi. Run v6: bộ tool mới 10/10 ở cả 2 lần, base không hồi quy (20/20 ×2) | Cả 3 tool mới là tool offline thuần Python, không gọi mạng, `side_effect: false`. Đã không làm tool tính toán (`calc`) vì prompt dặn toán thông thường thì trả lời thẳng, tránh hồi quy R14 |
 | `send` gửi thật lên Telegram sau xác nhận | `starter_v0/transcripts/v5_openai_web_20261111T093140281155.transcript.json` (OpenAI gpt-4o-mini, prompt v5 `fe951822206a`, tools `198864b46581`; lượt 1 `lookup` tìm tin AI, lượt 2 "gửi qua tele cho tôi" → `clarify(yes_no)`, lượt 3 "ok" → `send(confirmed=true)` → `status: sent`). Bằng chứng thứ hai: `starter_v0/transcripts/v1_gemini_web_20261110T185836854159.transcript.json` (chạy qua web UI, Gemini, prompt v3-gemini `b3626215b74b`; tên file ghi `v1` do nhãn `--version` khi bật server) | Lượt 1: user yêu cầu tìm 3 tin AI rồi đăng → agent gọi `clarify` (`yes_no`) hỏi xác nhận, chưa gửi. Lượt 2: user trả lời "có" → agent gọi `send(confirmed=true)` → `status: sent`, tin hiện trên kênh private của nhóm | Chỉ gửi sau khi user xác nhận ở lượt sau (rule trong `system_prompt.md` + mô tả `send` trong `tools.yaml`); token và chat ID chỉ nằm trong `.env`, đã kiểm tra transcript không chứa token |
-| Test challenge (0 skipped / regression test) | `pytest` output | Không đạt: `pytest` báo 78 passed, **14 skipped** (stub TODO của tool có sẵn), chưa có regression test cho bug của tool có sẵn | — |
+| Test challenge (0 skipped / regression test) | `starter_v0/tests/test_tools_todo.py` (đã thay đủ 14 stub `pytest.skip`), `pytest`: **151 passed, 0 skipped, 0 failed**; regression test `test_send_regression_only_boolean_true_counts_as_confirmation`; sửa ở `starter_v0/tools/send/tool.py` | 0 skipped. Tìm được 1 bug ở tool có sẵn `send` (xem bên dưới), đã sửa và giữ test làm regression test | Chỉ boolean `True` mới được gửi; `"false"`, `"no"`, `0`, `None`, chuỗi rỗng đều trả `needs_confirmation` và không gọi mạng |
 
-Test challenge: số bug tìm được trong tool có sẵn (nếu có), cách sửa, và test regression tương ứng.
+Test challenge: **1 bug ở tool có sẵn.** `send_telegram` dùng `if not confirmed`, nên nếu model gửi `confirmed="false"` (chuỗi, truthy) thì tool vẫn đăng lên Telegram, phá bảo vệ xác nhận. Test mới tham số hóa `"false"`, `"False"`, `"no"` bị lỗi trước khi sửa (3 test FAIL, tool trả `status: sent`). Sửa: `if confirmed is not True`. Eval hiện tại không bắt được lỗi này vì model luôn gửi boolean. Regression test: `test_send_regression_only_boolean_true_counts_as_confirmation`.
 
 ### B7. Small Local Model Challenge (bonus)
 
-**Nhóm không thực hiện bonus này** (chưa chạy model Ollama nào), nên các bảng dưới để trống.
+**Nhóm không thực hiện bonus này** (máy của nhóm không chạy được model local qua Ollama), nên các bảng dưới để trống.
 
 | Version | Model (provider) | Prompt/Tools | case_accuracy | tool_routing | argument | multiturn | Run File |
 |---|---|---|---|---|---|---|---|

@@ -1,0 +1,728 @@
+{
+  "run_id": "v6_B_extension_openai_20261111T095118171962",
+  "version": "v6",
+  "artifact_version": "v6+pfe951822206a+t5fe1e927e2f8",
+  "prompt_hash": "fe951822206af64409fbdb7f23456f5b993f6b1c77fb8039edc0b0920e7593b2",
+  "tools_hash": "5fe1e927e2f8372ce974650b6ef7974fea12b73d5dbb0381c8feba3a91a7ab09",
+  "phase": "B",
+  "suite": "extension",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "C:\\Users\\nmduc\\Desktop\\AI_VinUni\\day_3_10-11-2026\\lab\\K5-L3-DAY03-ResearchAgentToolEval\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "C:\\Users\\nmduc\\Desktop\\AI_VinUni\\day_3_10-11-2026\\lab\\K5-L3-DAY03-ResearchAgentToolEval\\starter_v0\\artifacts\\tools.yaml",
+  "eval_cases": "data\\eval_bonus_tools.json",
+  "dataset_id": "day03_v2_research_bonus_tools",
+  "dataset_role": "extension",
+  "description": "Case kiểm tra 3 tool mới của nhóm (cite, dedupe, text_stats): mỗi tool có case nên gọi và case không nên gọi. Chạy riêng bằng --eval-cases data/eval_bonus_tools.json --suite extension; không thay thế eval_base.json hay eval_group.json.",
+  "generated_at": "2026-11-11T09:51:18",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 10,
+    "provider_error_cases": 0,
+    "passed_cases": 10,
+    "case_accuracy": 1.0,
+    "tool_routing_accuracy": 1.0,
+    "argument_accuracy": 1.0,
+    "multiturn_accuracy": 1.0,
+    "failure_counts": {},
+    "observed_mismatch_counts": {}
+  },
+  "results": [
+    {
+      "id": "T01_cite_apa_from_given_metadata",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "route_cite",
+        "difficulty": "easy",
+        "what_it_tests": "Đã có đủ tiêu đề, tác giả, năm, link và user yêu cầu trích dẫn APA → gọi cite (style=apa), không tìm lại bằng papers."
+      },
+      "input": "Tạo trích dẫn APA cho bài 'Attention Is All You Need' của Vaswani và cộng sự, năm 2017, link https://arxiv.org/abs/1706.03762",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "cite",
+            "args": {
+              "style": "apa"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "cite",
+            "args": {
+              "title": "Attention Is All You Need",
+              "authors": [
+                "Vaswani, A.",
+                "Shankar, S.",
+                "Parmar, N.",
+                "Uszkoreit, J.",
+                "Jones, L.",
+                "Gomez, A.N.",
+                "Kaiser, Ł.",
+                "Kudlur, M.",
+                "Nath, M.",
+                "Vaswani, A."
+              ],
+              "year": 2017,
+              "url": "https://arxiv.org/abs/1706.03762",
+              "style": "apa"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "cite",
+          "args": {
+            "title": "Attention Is All You Need",
+            "authors": [
+              "Vaswani, A.",
+              "Shankar, S.",
+              "Parmar, N.",
+              "Uszkoreit, J.",
+              "Jones, L.",
+              "Gomez, A.N.",
+              "Kaiser, Ł.",
+              "Kudlur, M.",
+              "Nath, M.",
+              "Vaswani, A."
+            ],
+            "year": 2017,
+            "url": "https://arxiv.org/abs/1706.03762",
+            "style": "apa"
+          },
+          "result": {
+            "tool": "make_citation",
+            "style": "apa",
+            "citation": "Vaswani, A., Shankar, S., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser, Ł., Kudlur, M., Nath, M., Vaswani, A. (2017). Attention Is All You Need. https://arxiv.org/abs/1706.03762",
+            "has_url": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "T02_cite_bibtex_style",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "cite_style_mapping",
+        "difficulty": "medium",
+        "what_it_tests": "Cụm 'BibTeX' → cite với style=bibtex (không dùng mặc định apa)."
+      },
+      "input": "Cho mình entry BibTeX của bài 'BERT: Pre-training of Deep Bidirectional Transformers' (Devlin, 2019), link https://arxiv.org/abs/1810.04805",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "cite",
+            "args": {
+              "style": "bibtex"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "cite",
+            "args": {
+              "title": "BERT: Pre-training of Deep Bidirectional Transformers",
+              "authors": [
+                "Devlin, Jacob"
+              ],
+              "year": 2019,
+              "url": "https://arxiv.org/abs/1810.04805",
+              "style": "bibtex"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "cite",
+          "args": {
+            "title": "BERT: Pre-training of Deep Bidirectional Transformers",
+            "authors": [
+              "Devlin, Jacob"
+            ],
+            "year": 2019,
+            "url": "https://arxiv.org/abs/1810.04805",
+            "style": "bibtex"
+          },
+          "result": {
+            "tool": "make_citation",
+            "style": "bibtex",
+            "citation": "@misc{jacob2019bert,\n  title = {BERT: Pre-training of Deep Bidirectional Transformers},\n  author = {Devlin, Jacob},\n  year = {2019},\n  url = {https://arxiv.org/abs/1810.04805}\n}",
+            "has_url": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "T03_cite_missing_source",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "clarify_before_cite",
+        "difficulty": "medium",
+        "what_it_tests": "Không nói rõ bài nào, chưa có thông tin nguồn → hỏi lại bằng clarify, không đoán tiêu đề hay tác giả để cite."
+      },
+      "input": "Trích dẫn bài báo đó giúp mình",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn có thể cung cấp tiêu đề hoặc thông tin cụ thể về bài báo mà bạn muốn trích dẫn không?",
+              "response_type": "text"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn có thể cung cấp tiêu đề hoặc thông tin cụ thể về bài báo mà bạn muốn trích dẫn không?",
+            "response_type": "text"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn có thể cung cấp tiêu đề hoặc thông tin cụ thể về bài báo mà bạn muốn trích dẫn không?",
+            "response_type": "text",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "T04_dedupe_given_list",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "route_dedupe",
+        "difficulty": "medium",
+        "what_it_tests": "Danh sách item đã có sẵn, user yêu cầu lọc trùng → gọi dedupe."
+      },
+      "input": "Lọc trùng giúp mình danh sách này: 1) 'Tin AI mới' https://a.com/x?utm_source=fb 2) 'Tin AI mới' https://a.com/x 3) 'Tin khác' https://b.com/y",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "dedupe"
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "dedupe",
+            "args": {
+              "items": [
+                {
+                  "title": "Tin AI mới",
+                  "url": "https://a.com/x?utm_source=fb"
+                },
+                {
+                  "title": "Tin AI mới",
+                  "url": "https://a.com/x"
+                },
+                {
+                  "title": "Tin khác",
+                  "url": "https://b.com/y"
+                }
+              ],
+              "key": "url"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "dedupe",
+          "args": {
+            "items": [
+              {
+                "title": "Tin AI mới",
+                "url": "https://a.com/x?utm_source=fb"
+              },
+              {
+                "title": "Tin AI mới",
+                "url": "https://a.com/x"
+              },
+              {
+                "title": "Tin khác",
+                "url": "https://b.com/y"
+              }
+            ],
+            "key": "url"
+          },
+          "result": {
+            "tool": "dedupe_items",
+            "key": "url",
+            "items": [
+              {
+                "title": "Tin AI mới",
+                "url": "https://a.com/x?utm_source=fb"
+              },
+              {
+                "title": "Tin khác",
+                "url": "https://b.com/y"
+              }
+            ],
+            "kept": 2,
+            "removed": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "T05_dedupe_not_needed_for_single_search",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "no_dedupe_without_list",
+        "difficulty": "medium",
+        "what_it_tests": "Chỉ cần một lần tìm kiếm, chưa có danh sách nào để lọc → chỉ gọi lookup, không gọi dedupe thừa."
+      },
+      "input": "Tìm tin tức về robot hình người trên web trong tuần này",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robot hình người",
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "lookup",
+          "args": {
+            "query": "robot hình người",
+            "topic": "news",
+            "timeframe": "week"
+          },
+          "result": {
+            "tool": "web_search",
+            "query": "robot hình người",
+            "topic": "news",
+            "timeframe": "week",
+            "items": [
+              {
+                "title": "Robot hình người: Xóa nhòa ranh giới thực - ảo | BÁO SÀI GÒN GIẢI PHÓNG",
+                "url": "https://www.sggp.org.vn/robot-hinh-nguoi-xoa-nhoa-ranh-gioi-thuc-ao-post880099.html",
+                "source": "sggp.org.vn",
+                "summary": "TRẦN BÌNH\n\nMới đy, Công ty CP Nghiên cứu, phát triển và ứng dụng robot hình người VinDynamics (thuộc hệ sinh thái Vingroup) đã đưa robot hình người Dyno được thử nghiệm tại Vinpearl Safari Phú Quốc trong vai trò hướng dẫn viên.\n\nNhờ tích hợp nền tảng AI cùng hệ thống micro định hình chùm tia, Dyno đã chứng minh kỹ năng vượt trội khi cô lập được giọng nói của người đối diện, có khả năng tư duy, xử lý ngôn ngữ tự nhiên và đưa ra cu trả lời đã khiến nhiều du khách hứng thú. [...] Hiện diện ngày càng nhiều\n\nThế hệ robot hình người hiện nay không chỉ biết đứng, biết đi mà còn biết làm việc trong môi trường vốn dành cho con người. Điều đó đòi hỏi robot phải có khả năng nhận diện không gian, giữ thăng bằng, xử lý vật thể, phối hợp tay chn và tương tác an toàn với con người.\n\n robot.jpg \n\nRobot hình người Dyno được thử nghiệm tại Vinpearl Safari Phú Quốc trong vai trò hướng dẫn viên,   \n﻿tạo sự thích thú với du khách. Ảnh: KIM THANH [...] Còn theo bà Linda Sui, nhà sáng lập của Công ty SAG, robot hình người được giao trong nửa đầu năm 2026 tăng khoảng 50% so với cùng kỳ năm trước. Sự tăng trưởng này cho thấy các doanh nghiệp ngày càng chú trọng đến khả năng ứng dụng thực tế của robot, thay vì chỉ tập trung vào nghiên cứu, thử nghiệm hoặc trình diễn công nghệ.",
+                "score": 0.81770587
+              },
+              {
+                "title": "Nhà sản xuất robot hình người đầu tiên của Mỹ lên sàn chứng khoán",
+                "url": "https://vneconomy.vn/techconnect/nha-san-xuat-robot-hinh-nguoi-dau-tien-cua-my-len-san-chung-khoan.htm",
+                "source": "vneconomy.vn",
+                "summary": "Dù vậy, việc đưa robot hình người vào môi trường làm việc có con người cùng hoạt động vẫn đặt ra những yêu cầu đáng kể về an toàn. Theo Bloomberg, các phiên bản Digit trước đy chỉ có thể vận hành trong khu vực được ngăn cách bằng hàng rào bảo vệ. Nguyên nhn là robot có chn khó dự đoán chuyển động hơn so với các hệ thống robot có bánh xe, do đó tiềm ẩn nhiều rủi ro hơn đối với người làm việc xung quanh. [...] Tại một cơ sở của GXO ở bang Georgia, robot Digit đã xử lý và di chuyển hơn 100.000 thùng hàng (tote). Đy là một trong những minh chứng về khả năng ứng dụng robot hình người vào các công việc vận hành trong môi trường logistics. [...] Với Digit 5, Agility Robotics cho biết thiết kế mới hướng tới khả năng hoạt động gần con người hơn, qua đó mở rộng phạm vi ứng dụng trong môi trường công nghiệp và logistics. Tuy nhiên, khả năng bảo đảm an toàn khi vận hành vẫn là vấn đề quan trọng mà doanh nghiệp phải chứng minh trong quá trình triển khai thương mại.",
+                "score": 0.7900289
+              },
+              {
+                "title": "Bước chạy kỷ lục của robot hình người",
+                "url": "https://ct.qdnd.vn/quoc-te/buoc-chay-ky-luc-cua-robot-hinh-nguoi-534495",
+                "source": "ct.qdnd.vn",
+                "summary": "Trước sức ép già hóa dân số và sự chuyển dịch cơ cấu lao động, giới hoạch định chính sách kỳ vọng robot hình người sẽ trở thành trụ cột tăng trưởng công nghiệp mới, nối tiếp làn sóng xe điện và năng lượng tái tạo. Lợi thế nổi bật của các doanh nghiệp bản địa nằm ở hệ sinh thái chuỗi cung ứng hoàn chỉnh, nơi các nhà xưởng tại đồng bằng sông Châu Giang và đồng bằng sông Dương Tử có thể nhanh chóng cung cấp động cơ không chổi than, hộp số giảm tốc điều hòa, cảm biến moment xoắn và gia công cơ khí [...] Khoảng cách từ một đường chạy thể thao đến dây chuyền sản xuất công nghiệp hay các cơ sở chăm sóc y tế là một bài toán hóc búa về độ tin cậy và chi phí vận hành. Để một robot hình người có thể thay thế sức lao động trên thực tế, tỷ lệ hoàn thành tác vụ không thể dừng lại ở mức 80 hay 90% đi kèm rủi ro chập cháy mạch điện. Môi trường công nghiệp đòi hỏi độ tin cậy tiệm cận mức tuyệt đối, khả năng hoạt động bền bỉ suốt ca làm việc kéo dài nhiều giờ và sự an toàn tuyệt đối khi vận hành cạnh con",
+                "score": 0.78866494
+              },
+              {
+                "title": "Menlo: Xây dựng bộ não AI cho kỷ nguyên robot hình người – Đánh giá toàn diện. — Quasa",
+                "url": "https://quasa.io/vi/video/menlo-xay-dung-bo-nao-ai-cho-ky-nguyen-robot-hinh-nguoi-danh-gia-toan-dien",
+                "source": "quasa.io",
+                "summary": "Nền tảng này lý tưởng cho các nhà sản xuất robot, công ty ô tô & logistics, kho hàng, cơ sở chăm sóc người cao tuổi, phòng thí nghiệm nghiên cứu và doanh nghiệp triển khai đội robot hình người—tự chủ xử lý những nhiệm vụ phức tạp như lấy hàng trong kho, hỗ trợ tại nhà, lắp ráp trong nhà máy, bổ sung hàng lên kệ bán lẻ và các quy trình phối hợp giữa con người với robot. [...] Giải pháp đột phá này từ Menlo.ai (menlo.ai) cung cấp các hệ thống trí tuệ hiện thn tiên tiến, trang bị cho robot hình người thế hệ tiếp theo khả năng suy luận giống con người, ra quyết định theo thời gian thực và hành vi thích ứng — giúp robot hoạt động an toàn và thông minh trong môi trường thực tế luôn biến động, đồng thời vượt trội so với phần mềm robot truyền thống và AI đa dụng về khả năng hiểu thế giới vật lý, độ an toàn và khả năng lập kế hoạch dài hạn. [...] Nền tảng đặc biệt mạnh trong việc đẩy nhanh cuộc cách mạng robot hình người, giảm khối lượng công việc kỹ thuật phát sinh, bảo đảm tun thủ quy định ngay từ đầu và tạo ra những robot thực sự hữu ích, giúp nng cao năng lực của người lao động thay vì thay thế họ.",
+                "score": 0.77137923
+              },
+              {
+                "title": "Cặp robot hình người dẫn bản tin đầu tiên thế giới ra mắt tại Bắc Kinh - Báo Tuyên Quang điện tử",
+                "url": "https://baotuyenquang.com.vn/quoc-te/202611/cap-robot-hinh-nguoi-dan-ban-tin-dau-tien-the-gioi-ra-mat-tai-bac-kinh-ed47016",
+                "source": "baotuyenquang.com.vn",
+                "summary": "Robot nam mang tên Xinyu, còn robot nữ mang tên Xinyan. Tn Hoa xã cho biết đy là hai robot hình người đầu tiên trên thế giới được thiết kế riêng để dẫn bản tin và hãng nắm toàn bộ quyền sở hữu trí tuệ đối với sản phẩm. [...] Hai robot do Tn Hoa xã và hãng công nghệ Trung Quốc UBTECH cùng phát triển, có kích thước tương đương người thật.\n\n|\n|  |\n| Robot hình người dẫn bản tin ứng dụng AI của Tn Hoa xã ra mắt tại một diễn đàn thuộc Hội nghị Thượng đỉnh Truyền thông Thế giới lần thứ 7 ở Bắc Kinh, Trung Quốc, ngày 5-11-2026. Ảnh: Zhang Chenlin/Tn Hoa xã | [...] Đạo diễn Trương Nghệ Mưu phụ trách thiết kế diện mạo cho hai robot, lấy phong thái của người dẫn bản tin truyền hình làm mẫu. UBTECH đảm nhiệm chế tạo, trong đó có lớp da mô phỏng da người, hệ điều hành và hệ thống điều khiển biểu cảm.\n\nMàn ra mắt diễn ra trong khuôn khổ Hội nghị Thượng đỉnh Truyền thông Thế giới lần thứ 7, do Tn Hoa xã và chính quyền thành phố Bắc Kinh đồng tổ chức từ ngày 5 đến 9-11. Hội nghị quy tụ gần 500 đại biểu đến từ 112 quốc gia và vùng lãnh thổ.",
+                "score": 0.7657514
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "T06_text_stats_given_text",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "route_text_stats",
+        "difficulty": "easy",
+        "what_it_tests": "User đưa đoạn văn và hỏi có vượt 280 ký tự → gọi text_stats thay vì tự đếm bằng chữ."
+      },
+      "input": "Đoạn này có vượt 280 ký tự không: 'Nhóm 101 vừa hoàn thành bài lab Research Agent, gồm baseline, bốn vòng tối ưu prompt, tool mới và giao diện chat. Mong mọi người dùng thử và góp ý để nhóm cải thiện thêm.'",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "text_stats"
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "text_stats",
+            "args": {
+              "text": "Nhóm 101 vừa hoàn thành bài lab Research Agent, gồm baseline, bốn vòng tối ưu prompt, tool mới và giao diện chat. Mong mọi người dùng thử và góp ý để nhóm cải thiện thêm."
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "text_stats",
+          "args": {
+            "text": "Nhóm 101 vừa hoàn thành bài lab Research Agent, gồm baseline, bốn vòng tối ưu prompt, tool mới và giao diện chat. Mong mọi người dùng thử và góp ý để nhóm cải thiện thêm."
+          },
+          "result": {
+            "tool": "text_stats",
+            "chars": 170,
+            "words": 35,
+            "reading_seconds": 10,
+            "limit": 280,
+            "over_limit": false,
+            "remaining": 110
+          }
+        }
+      ]
+    },
+    {
+      "id": "T07_text_stats_missing_text",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "clarify_before_text_stats",
+        "difficulty": "medium",
+        "what_it_tests": "Không có đoạn văn nào để đếm → hỏi lại bằng clarify, không gọi text_stats với text rỗng hay bịa."
+      },
+      "input": "Đếm giúp mình số từ của đoạn văn",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn vui lòng cung cấp đoạn văn mà bạn muốn đếm số từ không?",
+              "response_type": "text"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "missing_info",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Bạn vui lòng cung cấp đoạn văn mà bạn muốn đếm số từ không?",
+            "response_type": "text"
+          },
+          "result": {
+            "tool": "ask_user",
+            "question": "Bạn vui lòng cung cấp đoạn văn mà bạn muốn đếm số từ không?",
+            "response_type": "text",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "T08_text_stats_not_for_summary",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "no_text_stats_for_summary",
+        "difficulty": "medium",
+        "what_it_tests": "Chỉ yêu cầu tóm tắt, không hỏi độ dài → không gọi text_stats (hay tool nào) thừa."
+      },
+      "input": "Tóm tắt trong đúng 1 câu đoạn này giúp mình: 'Công ty vừa công bố mô hình mới, độ chính xác tăng 5% và chi phí giảm một nửa so với phiên bản trước.'",
+      "expect": {
+        "no_tool": true
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [],
+        "actual_text": "Công ty vừa ra mắt mô hình mới với độ chính xác tăng 5% và chi phí giảm 50% so với phiên bản trước.",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": []
+    },
+    {
+      "id": "T09_multiturn_text_stats_after_text_given",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_route_text_stats",
+        "difficulty": "hard",
+        "what_it_tests": "Văn bản được đưa ở lượt trước, lượt cuối hỏi độ dài → gọi text_stats với đoạn văn đã có (nhớ ngữ cảnh)."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Mình soạn tweet này: 'Hôm nay nhóm 101 chốt xong bài lab, cảm ơn mọi người đã góp ý!'"
+        },
+        {
+          "role": "user",
+          "content": "Nó có vừa giới hạn 280 ký tự không?"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "text_stats"
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "text_stats",
+            "args": {
+              "text": "Hôm nay nhóm 101 chốt xong bài lab, cảm ơn mọi người đã góp ý!",
+              "limit": 280
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "text_stats",
+          "args": {
+            "text": "Hôm nay nhóm 101 chốt xong bài lab, cảm ơn mọi người đã góp ý!",
+            "limit": 280
+          },
+          "result": {
+            "tool": "text_stats",
+            "chars": 62,
+            "words": 15,
+            "reading_seconds": 4,
+            "limit": 280,
+            "over_limit": false,
+            "remaining": 218
+          }
+        }
+      ]
+    },
+    {
+      "id": "T10_multiturn_cite_after_source_given",
+      "phase": "B",
+      "suite": "extension",
+      "case_suite": "extension",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_route_cite",
+        "difficulty": "hard",
+        "what_it_tests": "Thông tin nguồn nằm ở lượt trước, lượt cuối yêu cầu citation → gọi cite dựa trên thông tin đã có, không tìm lại."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Mình vừa đọc bài 'Language Models are Few-Shot Learners' của Brown và cộng sự, năm 2020"
+        },
+        {
+          "role": "user",
+          "content": "Cho mình citation APA của bài đó"
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "cite",
+            "args": {
+              "style": "apa"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": true,
+        "routing_correct": true,
+        "args_correct": true,
+        "actual_tool_calls": [
+          {
+            "name": "cite",
+            "args": {
+              "title": "Language Models are Few-Shot Learners",
+              "authors": [
+                "Brown, T. B.",
+                "Manning, C. D.",
+                "Raffel, C.",
+                "Subbiah, M.",
+                "Kaplan, J.",
+                "Dhariwal, P.",
+                "Neelakantan, A.",
+                "Klein, A.",
+                "Murray, I."
+              ],
+              "year": 2020,
+              "url": "https://arxiv.org/abs/2005.14165",
+              "style": "apa"
+            }
+          }
+        ],
+        "actual_text": null,
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": null,
+        "failure_type": null,
+        "failures": []
+      },
+      "tool_results": [
+        {
+          "tool": "cite",
+          "args": {
+            "title": "Language Models are Few-Shot Learners",
+            "authors": [
+              "Brown, T. B.",
+              "Manning, C. D.",
+              "Raffel, C.",
+              "Subbiah, M.",
+              "Kaplan, J.",
+              "Dhariwal, P.",
+              "Neelakantan, A.",
+              "Klein, A.",
+              "Murray, I."
+            ],
+            "year": 2020,
+            "url": "https://arxiv.org/abs/2005.14165",
+            "style": "apa"
+          },
+          "result": {
+            "tool": "make_citation",
+            "style": "apa",
+            "citation": "Brown, T. B., Manning, C. D., Raffel, C., Subbiah, M., Kaplan, J., Dhariwal, P., Neelakantan, A., Klein, A., Murray, I. (2020). Language Models are Few-Shot Learners. https://arxiv.org/abs/2005.14165",
+            "has_url": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -17,7 +17,7 @@
 ## 3. Đóng góp cụ thể
 
 ### CP1 — Baseline v0
-- Dùng chung `.venv` ở thư mục gốc cho cả khóa, cài thư viện của lab vào đó; chạy preflight (`--provider openai`) và `pytest` (contract và example xanh, test TODO còn skipped).
+- Dùng chung `.venv` ở thư mục gốc cho cả khóa, cài thư viện của lab vào đó; chạy preflight (`--provider openai`) và `pytest` (ở thời điểm CP1: contract và example xanh, test TODO còn skipped; sau này đã thay đủ, xem mục Bonus).
 - Chạy base eval `v0` (20 case): `case_accuracy` 0.65, `provider_error_cases = 0`, `measured_cases = 20`. Phân loại 7 case FAIL (R03, R08, R10, R11, R12, R13, R14) theo loại lỗi và nguyên nhân (bảng B2). Kết luận: cả 7 lỗi khớp với ba chỉ dẫn xấu cố ý của prompt starter (đoán thay vì hỏi, gửi ngay, ép một bước).
 - Ghi dòng `v0` vào `version_log.csv` và B1, B2.
 
@@ -30,6 +30,14 @@
   - **v5** (rule "mỗi nhu cầu chỉ gọi một tool tìm kiếm, trừ khi user nói rõ muốn nhiều nguồn"): base 1.00 / 1.00, R10 PASS 2/2 (R13 vẫn PASS), nhưng group vẫn 0.90 / 0.90 vì G09 vẫn FAIL (gọi thêm `social_search` sau `lookup`). R10 có khả năng đã sửa nhưng chưa đủ lần chạy để chắc chắn; G09 chưa sửa. Giả thuyết cho vòng sau: bỏ chữ `social_search` khỏi câu rule `query` của prompt v3 (prompt v2 không có câu đó và PASS G09).
 - Cập nhật `version_log.csv` (các dòng `v1`, `v2`, `v3`, `v3-nam`, `v2-artifact`, `v4`, `v5` và các dòng Gemini tham khảo) và B1, B2 trong `group_report.md`.
 
+### Bonus (có hỗ trợ của Claude Code)
+- **Tool mới:** viết thêm 3 tool offline `cite` (trích dẫn APA/IEEE/BibTeX), `dedupe` (lọc trùng kết quả), `text_stats` (đếm ký tự/từ, kiểm tra giới hạn 280) trong `starter_v0/tools/`, mỗi tool có `TOOL.md`, đăng ký trong `tools/__init__.py` và `tools.yaml`, ≥ 3 test, cùng bộ eval `data/eval_bonus_tools.json` (10 case, có cả case không nên gọi). Cùng `artifact` của Quang, nhóm có 4 tool tự viết. Cố ý không làm tool tính toán vì prompt dặn toán thông thường thì trả lời thẳng.
+- **Version v6** (chỉ đổi `tools.yaml`, prompt giữ nguyên v5): base 20/20 ×2 (không hồi quy), group 0.90 / 1.00 (G09 dao động), bộ tool mới 10/10 ×2.
+- **Test challenge:** thay đủ 14 stub trong `tests/test_tools_todo.py`; `pytest` 151 passed, 0 skipped. Test lộ bug ở tool có sẵn `send`: `confirmed="false"` (chuỗi) vẫn gửi Telegram; sửa thành `confirmed is not True` và giữ regression test.
+- **Rà soát độc lập phần bonus:** một agent chấm riêng cho 6/6 điểm bonus (không tính Small Local Model) và chỉ ra 2 bug thật: `dedupe` coi "Đà Nẵng" và "À Nẵng" là trùng (thiếu xử lý chữ `đ`), tiêu đề không có chữ latin bị xóa nhầm; `cite` sai khóa BibTeX với tên "Họ, Tên". Tôi đã sửa kèm regression test.
+- **Telegram thật:** transcript `v5_openai_web_20261111T093140281155` có `send(confirmed=true)` → `status: sent`.
+- **Không làm:** Small Local Model, vì máy không chạy được Ollama.
+
 ### CP4 — Eval nhóm
 - Viết `data/eval_group.json`: 10 case (5 single turn, 5 multi turn), mỗi case có `failure_type`, `expect`, `metadata.what_it_tests`. Phủ các điểm bộ base chưa có: xác nhận gửi, hủy gửi, bỏ `@` ở handle, `timeframe=month`, chuyển tool giữa chừng, và 4 case cho tool `artifact` của Quang (2 nên gọi, 2 không nên gọi). Test `tests/test_tool_contract.py` xanh sau khi thêm.
 - Chạy `--suite group` và điền bảng B3 (v3: 9/10, v3 gốc của Nam: 8/10, đối chứng v2-artifact: 10/10).
@@ -38,7 +46,7 @@
 - Build giao diện web của Quang, cài `cloudflared`, chạy `server.py --provider openai --version v3` và mở link `trycloudflare.com` cho nhóm khác dùng thử (đã kiểm tra link trả HTTP 200).
 - Chat thử ba phiên với v3 (yêu cầu thường; thiếu URL rồi bổ sung; yêu cầu gửi → xin xác nhận → `send`), quét khóa API trong transcript rồi commit.
 - Sau đó cấu hình Telegram trên máy tôi và chat lại một phiên trên OpenAI (prompt v5): "gửi qua tele cho tôi" → `clarify(yes_no)` → "ok" → `send(confirmed=true)` → `status: sent`. Transcript này ban đầu có tên `v3` do tôi bật máy chủ với `--version v3`, nhưng hash là của prompt v5 nên tôi đổi tên và nhãn thành `v5`. Tôi cũng sửa nhãn hai transcript `v0_openai_web_*` bị gắn nhầm thành `v3` vì hash trong file là của v3 (một transcript v0 thật được giữ nguyên); việc sửa nhãn đã ghi ở B4.
-- Điền các mục còn lại của `group_report.md`: A1 (link, lệnh chạy), mục 3, B4 (ba phiên OpenAI), B5 (ghi rõ các bonus không đạt), mục 5, B6, mục 8.
+- Điền các mục còn lại của `group_report.md`: A1 (link, lệnh chạy), mục 3, B4 (ba phiên OpenAI), B5 (ban đầu ghi các bonus không đạt, sau đó cập nhật khi làm bonus), mục 5, B6, mục 8.
 
 ## 4. Bằng chứng
 
@@ -57,13 +65,13 @@
   - `v2_B_base_openai_20261110T183148819703.json` (0.95)
   - `v3_B_base_openai_20261110T184941408701.json` (0.95), `v3_B_group_openai_20261110T185010179172.json` (0.90)
   - Đối chiếu: `v3-nam_B_*_openai_*.json`, `v2-artifact_B_group_openai_20261110T184249362732.json`
-  - Vòng sau: `v4_B_base_openai_*.json` (3 run), `v4_B_group_openai_*.json` (2 run), `v5_B_base_openai_*.json` (2 run), `v5_B_group_openai_*.json` (2 run); danh sách đầy đủ trong `starter_v0/artifacts/version_log.csv`.
+  - Vòng sau: `v4_B_base_openai_*.json` (3 run), `v4_B_group_openai_*.json` (2 run), `v5_B_base_openai_*.json` (2 run), `v5_B_group_openai_*.json` (2 run), `v6_B_base_openai_*.json` (2 run), `v6_B_group_openai_*.json` (2 run), `v6_B_extension_openai_*.json` (2 run); danh sách đầy đủ trong `starter_v0/artifacts/version_log.csv`.
 - Transcript: `starter_v0/transcripts/v3_openai_web_20261110T191013015667`, `…191400882629`, `…191448500175` (`.transcript.json`); `v5_openai_web_20261111T093140281155` (gửi Telegram thành công); `v3_openai_web_20261110T194302105068` và `…194701705690` (phiên thử, đã sửa nhãn từ v0).
 - AI/công cụ đã dùng và cách tự kiểm tra kết quả:
   - Dùng **Claude Code** để hỗ trợ đọc đề, viết lại prompt, viết case eval, chạy lệnh và soạn báo cáo. Tôi không tin kết quả của AI mà kiểm tra bằng:
   - **Đọc số liệu từ run JSON** (`summary`, `provider_error_cases`, `measured_cases`, `prompt_hash`, `tools_hash`, `actual_tool_calls`), không dựa vào phần AI tóm tắt.
   - **Hai lần cho một agent khác review độc lập** (chỉ đọc file, không sửa): lần 1 phát hiện giả thuyết v1 "sẽ sửa R10–R12" đã bị run bác bỏ và R03 nên là `wrong_arg_value`; lần 2 phát hiện v2 so sánh khác model và `tools.yaml` có chép ví dụ từ eval; lần 3 phát hiện báo cáo v3 bỏ sót run đối chứng `v2-artifact`. Tôi sửa báo cáo theo từng lần. Lần chấm độc lập cuối (86/100, không tính bonus) chỉ ra các điểm yếu còn lại: mỗi version gộp nhiều thay đổi, R10 và G09 chưa xử lý, nhãn transcript sai, `TEAM.md` thiếu thông tin; tôi xử lý được phần lớn ở vòng v4/v5 và phần ghi chú.
-  - **Chạy `pytest`** (78 passed, 14 skipped, 0 failed) và **quét khóa API** trong run, transcript trước khi commit; kiểm tra link dùng thử từ bên ngoài.
+  - **Chạy `pytest`** (ở thời điểm nộp bản đầu 78 passed, 14 skipped; hiện 151 passed, 0 skipped, 0 failed) và **quét khóa API** trong run, transcript trước khi commit; kiểm tra link dùng thử từ bên ngoài.
 
 ## 5. Tự đánh giá
 
@@ -71,6 +79,6 @@
 - **Chưa tốt / bài học:**
   - v1 và v3 gộp nhiều thay đổi nên không tách được đóng góp từng rule; lẽ ra nên chia thành các version nhỏ hơn.
   - Phát hiện lệch model và overfit muộn, khi các thành viên đã chạy xong v2, v3 trên Gemini; nên thống nhất provider/model ngay từ CP1.
-  - Chưa làm bonus nào (Small Local Model, ≥ 4 tool, test challenge). G09 vẫn FAIL sau hai version (v4, v5); R10 có khả năng đã sửa ở v5 nhưng mới có 2 lần chạy. Nhóm chưa thêm rule routing vào `system_prompt.md` và chưa thêm "KHÔNG DÙNG KHI" cho `format`, `papers`, `paper_text`.
+  - Bonus: làm 3 trong 4 (≥ 4 tool, Telegram thật, test challenge); không làm Small Local Model vì máy không chạy được Ollama. G09 vẫn FAIL sau hai version (v4, v5); R10 có khả năng đã sửa ở v5 nhưng mới có 2 lần chạy. Nhóm chưa thêm rule routing vào `system_prompt.md` và chưa thêm "KHÔNG DÙNG KHI" cho `format`, `papers`, `paper_text`.
   - Ban đầu máy tôi chưa cấu hình Telegram nên lượt `send` trong phiên A bị lỗi; sau đó tôi cấu hình và chạy lại, có transcript `status: sent` trên OpenAI.
 - **Nếu làm lại:** chốt provider/model và `.gitattributes` (để `prompt_hash`/`tools_hash` không đổi giữa các máy) trước khi chạy v0; chạy mỗi cấu hình nhiều lần để ước lượng nhiễu; viết bộ eval nhóm trước khi sửa prompt để tránh tune theo bộ base.
