@@ -12,7 +12,7 @@
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
 |   1 | Nguyễn Minh Đức | 2A202603751 | nmduc7904@gmail.com | [Minhduc7904](https://github.com/Minhduc7904) | Baseline v0, v1; chạy lại v2/v3 trên OpenAI; eval nhóm (CP4); demo và báo cáo nhóm |
-|   2 | Đỗ Lý Hoàng Nam | 2A202603777 |  | [DoLyHoangNam](https://github.com/DoLyHoangNam) | Tối ưu Prompt & Tools (CP1, CP2) |
+|   2 | Đỗ Lý Hoàng Nam | 2A202603777 | dolyhoangnam13072005@gmail.com | [DoLyHoangNam](https://github.com/DoLyHoangNam) | Tối ưu Prompt & Tools (CP1, CP2) |
 |   3 | Nguyễn Ngọc Quang | 2A202603773 | 26ai.quangnn3@vinuni.edu.vn | [shoxieje](https://github.com/shoxieje) | Giao diện web (CP5), tool mới `artifact` (CP3) |
 
 ## Cá nhân
