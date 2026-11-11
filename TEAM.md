@@ -5,7 +5,7 @@
 - Tên nhóm:nhóm 101
 - Lớp: L3B
 - Repo nhóm: `K5-L3B-DAY03-Nhom101-ResearchAgentToolEval` (xem [SUBMISSION.md](SUBMISSION.md))
-- URL repo, nhánh nộp, commit chốt: https://github.com/Minhduc7904/K5-L3B-DAY03-Nhom101-ResearchAgentToolEval
+- URL repo, nhánh nộp, commit chốt: https://github.com/Minhduc7904/K5-L3B-DAY03-Nhom101-ResearchAgentToolEval, nhánh `main`, commit chốt `731f3c7` (commit cuối có thay đổi mã, dữ liệu và báo cáo; commit ghi dòng này chỉ cập nhật `TEAM.md`)
 
 ## Thành viên
 
