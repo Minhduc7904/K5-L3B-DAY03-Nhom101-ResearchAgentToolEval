@@ -11,7 +11,7 @@
 
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
-|   1 | Nguyễn Minh Đức | 2A202603751 |  | [Minhduc7904](https://github.com/Minhduc7904) | Baseline v0, v1; chạy lại v2/v3 trên OpenAI; eval nhóm (CP4); demo và báo cáo nhóm |
+|   1 | Nguyễn Minh Đức | 2A202603751 | nmduc7904@gmail.com | [Minhduc7904](https://github.com/Minhduc7904) | Baseline v0, v1; chạy lại v2/v3 trên OpenAI; eval nhóm (CP4); demo và báo cáo nhóm |
 |   2 | Đỗ Lý Hoàng Nam | 2A202603777 |  | [DoLyHoangNam](https://github.com/DoLyHoangNam) | Tối ưu Prompt & Tools (CP1, CP2) |
 |   3 | Nguyễn Ngọc Quang | 2A202603773 |  | [shoxieje](https://github.com/shoxieje) | Giao diện web (CP5), tool mới `artifact` (CP3) |
 
@@ -62,7 +62,7 @@ Sao chép mục dưới đây cho từng thành viên.
 - Thiết lập môi trường ảo `.venv`, cấu hình `.env`, kiểm thử pass 100% bộ contract test (`pytest`).
 - Thực hiện chạy eval Baseline `v0` chuẩn hợp lệ (20/20 cases, 0 provider error, 65% accuracy), phân tích 7 failure cases ban đầu và cập nhật bảng B1, B2 trong `group_report.md`.
 - Tối ưu hóa toàn diện `starter_v0/artifacts/tools.yaml` (v2): định nghĩa rõ ràng ranh giới khi nào dùng / khi nào không dùng, phân biệt `lookup` và `social_search`, chuẩn hóa quy ước tham số (`response_type='text'/'yes_no'`, `screenname`, `topic`, `timeframe`), đưa accuracy từ 75% lên 90% (tool routing và multiturn đạt tuyệt đối 100%).
-- Tinh chỉnh `starter_v0/artifacts/system_prompt.md` (v3): bổ sung quy tắc trích xuất giữ nguyên từ khóa query và boundary xác nhận an toàn trước khi `send`, đưa hệ thống đạt điểm tuyệt đối 100% (20/20 cases PASS).
+- Tinh chỉnh `starter_v0/artifacts/system_prompt.md` (v3): bổ sung quy tắc trích xuất giữ nguyên từ khóa query và boundary xác nhận an toàn trước khi `send`, đưa hệ thống đạt điểm tuyệt đối 100% (20/20 cases PASS) trên Gemini. Lưu ý: khi chạy trên OpenAI với bộ group của nhóm, bản prompt này chỉ đạt 8/10 (`v3-nam` trong `version_log.csv`), nên 100% ở bộ base có dấu hiệu tune theo bộ base chứ chưa chắc tổng quát.
 - Ghi nhận đầy đủ các mốc `v0`, `v2`, `v3` vào `starter_v0/artifacts/version_log.csv`.
 
 ### Bằng chứng

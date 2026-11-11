@@ -37,7 +37,7 @@ Mở http://localhost:8000. Mỗi phiên chat được tự lưu thành file tro
 
 > Dán link public để team khác mở thử ngay. Cách deploy nhanh bằng Cloudflare Tunnel xem README. Nếu deploy Vercel/Streamlit Cloud thì dán link đó.
 >
-> URL: https://unless-votes-pairs-bidding.trycloudflare.com  *(link tạm thời của Cloudflare Tunnel, chỉ hoạt động khi máy chạy `server.py` và `cloudflared` còn bật; mỗi lần chạy lại sẽ ra link mới)*
+> URL: https://unless-votes-pairs-bidding.trycloudflare.com  *(link tạm thời của Cloudflare Tunnel, chỉ hoạt động khi máy chạy `server.py` và `cloudflared` còn bật; mỗi lần chạy lại sẽ ra link mới; nhóm chưa kiểm chứng link còn hoạt động tại thời điểm nộp, nếu không mở được thì chạy theo lệnh ở trên)*
 
 Cách mở link cho team khác: khi máy chủ đang chạy, mở terminal khác và chạy `cloudflared tunnel --url http://localhost:8000`, rồi gửi link `trycloudflare.com` được in ra.
 
@@ -97,6 +97,8 @@ Lấy từ `starter_v0/artifacts/version_log.csv` và `starter_v0/runs/*.json`. 
 | v1 | system_prompt.md | Bỏ chỉ dẫn xấu (đoán / gửi ngay / một bước), thêm rule `clarify` khi thiếu thông tin và xác nhận trước `send`; không đụng `tools.yaml` | 0.65 | 0.75 (15/20) | `runs/v1_B_base_openai_20261110T175547880942.json` |
 | v2 | tools.yaml (viết lại mô tả nhiều tool, xem ghi chú) | `tools.yaml` mơ hồ (không nói khi nào dùng/không dùng, thiếu quy ước `response_type`, `topic`, handle) là nguyên nhân lỗi còn lại của v1. **Lưu ý: thay đổi gộp nhiều tool, không phải một giả thuyết đơn lẻ** | 0.75 | 0.95 (19/20) | `runs/v2_B_base_openai_20261110T183148819703.json` |
 | v3 | system_prompt.md | Viết lại prompt (ý tưởng v3 của Nam) với **4 thay đổi gộp**: `clarify` dùng `response_type="text"` khi thiếu thông tin; rule `query` (giữ từ khóa gốc, không đưa "news"/thời gian vào `query`); luồng xác nhận `send` (hỏi `yes_no`, gửi `confirmed=true` sau khi user xác nhận rõ, hủy thì không gửi); trả lời thẳng khi ngoài phạm vi. Bỏ câu chép từ eval. Không phải một giả thuyết đơn lẻ | 0.95 | 0.95 (19/20) | `runs/v3_B_base_openai_20261110T184941408701.json` |
+| v4 | system_prompt.md (đúng 1 rule thêm vào prompt v3) | Rule "chỉ xử lý yêu cầu ở lượt cuối, các lượt trước chỉ là ngữ cảnh; user đổi nguồn thì chỉ gọi tool của yêu cầu mới" sẽ sửa G09 và R10. **Giả thuyết bị bác bỏ** | 0.95 | 0.95 / 1.00 / 0.95 (3 run base); group 0.90 / 0.90 | `runs/v4_B_base_openai_20261111T091656874586.json` (các run khác trong `version_log.csv`) |
+| v5 | system_prompt.md (đúng 1 rule thêm vào prompt v4) | Rule "mỗi nhu cầu thông tin chỉ gọi đúng 1 tool tìm kiếm, trừ khi user nói rõ muốn nhiều nguồn" sẽ sửa cả G09 và R10. **R10 có khả năng đã được sửa, G09 chưa** | 0.95 | 1.00 / 1.00 (2 run base); group 0.90 / 0.90 | `runs/v5_B_base_openai_20261111T092218638603.json` (các run khác trong `version_log.csv`) |
 
 Các chỉ số chi tiết (từ `summary` trong run JSON):
 
@@ -106,6 +108,17 @@ Các chỉ số chi tiết (từ `summary` trong run JSON):
 | v1 | 0.75 | 0.90 | 0.75 | 0.667 | R10, R11, R12, M02, M06 |
 | v2 (OpenAI) | 0.95 | 1.00 | 0.95 | 1.000 | R12 |
 | v3 (OpenAI) | 0.95 | 0.95 | 0.95 | 1.000 | R10 |
+| v4 (OpenAI, 3 run) | 0.95 / 1.00 / 0.95 | 0.95 / 1.00 / 0.95 | 0.95 / 1.00 / 0.95 | 1.000 | R10 (2/3 run) |
+| v5 (OpenAI, 2 run) | 1.00 / 1.00 | 1.00 / 1.00 | 1.00 / 1.00 | 1.000 | không có |
+
+Bộ group (10 case): v3 0.90 (G09 FAIL); v4 0.90 / 0.90 (G09 FAIL cả 2 run); v5 0.90 / 0.90 (G09 FAIL cả 2 run). Mỗi run có `provider_error_cases=0`, `measured_cases` bằng `total_cases`.
+
+**Vòng v4 → v5 (chạy sau khi nộp bản đầu, một giả thuyết mỗi version).**
+
+- v4 (rule "chỉ xử lý lượt cuối"): bác bỏ. G09 FAIL cả 2 lần (lần 1 gọi thêm `social_search`, lần 2 gọi thêm `lookup` với `topic=general`), R10 FAIL 2/3 lần. Harness đã sẵn dặn model "dùng lượt trước làm ngữ cảnh, không gọi tool cho chúng" nên rule bị trùng; lỗi thật là model gọi dư tool tìm kiếm thứ hai ở lượt cuối.
+- v5 (rule "một nhu cầu, một tool tìm kiếm"): base 20/20 ở cả 2 lần, R10 PASS 2/2 (v4 chỉ PASS 1/3, v3 FAIL 1/1), R13 (cần gọi cả web và tweet) vẫn PASS nhờ ngoại lệ "user nói rõ muốn nhiều nguồn". **G09 vẫn FAIL 2/2**, vẫn gọi thêm `social_search` sau `lookup`. R10 có khả năng đã được sửa nhưng 2 lần chạy chưa đủ để chắc chắn vì R10 dao động giữa các lần chạy.
+- Giả thuyết cho vòng sau: rule `query` của v3 nhắc `lookup` và `social_search` trong cùng một câu nên có thể kéo model gọi cả hai; prompt v2 (không có rule này) PASS G09. Chưa thử.
+- Đây là kết quả trung thực: G09 chưa được xử lý sau 2 version. Hai run base mỗi cấu hình vẫn là mẫu nhỏ.
 
 Nhận xét v2 (dựa trên run JSON `v2_B_base_openai_20261110T183148819703.json`, OpenAI gpt-4o-mini, cùng model với v0 và v1):
 
@@ -123,11 +136,12 @@ Nhận xét v3 (OpenAI gpt-4o-mini; prompt `718f89bc937b`; base: `v3_B_base_open
 - **Đối chứng `v2-artifact`** (prompt v2 + `tools.yaml` đã có `artifact`, chạy bộ group, run `v2-artifact_B_group_openai_20261110T184249362732.json`): **10/10**, G06 và G09 đều PASS. Nghĩa là trên bộ group, prompt v3 (9/10) và bản gốc của Nam (8/10) **không tốt hơn** prompt v2 cùng tools; G09 là hồi quy do prompt v3, không phải điểm yếu có sẵn. Chưa có run base cho cấu hình `v2-artifact`, nên phần base vẫn lẫn ảnh hưởng của tool `artifact`.
 - Chưa thể kết luận v3 tốt hơn v2: (1) mẫu nhỏ, một run; (2) `tools.yaml` đã có thêm tool `artifact` của Quang (tools_hash `198864b46581`) so với v2 (`474f8a0277b2`), nên không hoàn toàn like-for-like.
 - So sánh với bản v3 gốc của Nam chạy trên cùng OpenAI (prompt `fe948272671c`, run `v3-nam_B_base_openai_20261110T184712292671.json` và `v3-nam_B_group_openai_20261110T184801942989.json`): base **1.00 (20/20)** nhưng group chỉ **0.80 (8/10)**. Hai case FAIL là G06 (đã được user xác nhận rõ mà agent vẫn hỏi lại `clarify` thay vì `send(confirmed=true)`) và G09. Prompt gốc chép nguyên văn câu của case R12 ("Đăng bản tin này lên Telegram...") cùng các ví dụ `"AI"`, `"tuần này"` trong prompt, và rule "luôn hỏi yes_no" khiến luồng xác nhận gửi bị hỏi lại. Chênh lệch base 1.00 so với group 0.80 là **dấu hiệu** bản gốc tune theo bộ base nhưng chưa chứng minh (chênh 1–2 case, một run mỗi bên; cả hai bản v3 đều FAIL G09 mà prompt v2 qua được).
-- Bản v3 chính thức của nhóm là bản đã viết lại (không chép từ eval, có rule không hỏi lại sau xác nhận rõ ràng): G06 PASS nhưng R10 và G09 vẫn là điểm yếu, dự kiến xử lý ở v4.
+- Bản v3 chính thức của nhóm là bản đã viết lại (không chép từ eval, có rule không hỏi lại sau xác nhận rõ ràng): G06 PASS nhưng R10 và G09 vẫn là điểm yếu; đã thử xử lý ở v4 và v5 (xem bên dưới).
 - Lưu ý bộ case: lượt đầu của G06, G07 trùng nguyên văn câu của R12 và lượt đầu của G09 trùng R01 (chỉ một lượt, không phải cả case). Run `v1_B_group_openai_...` dùng phiên bản cũ của bộ group (có case G05 tên mơ hồ) nên không so sánh trực tiếp với các run group sau này.
 - Hash phụ thuộc kết thúc dòng: `system_prompt.md` ghi LF trên đĩa nhưng git có thể chuyển CRLF khi checkout trên Windows, nên `prompt_hash` có thể đổi theo máy dù nội dung giống nhau; nên thêm `.gitattributes` (`* text eol=lf`) ở vòng sau.
 - Hạn chế đã biết: case R12 mong `clarify(yes_no)` ngay khi user chưa đưa nội dung. Hành vi đúng thực tế có thể là hỏi nội dung trước; ta chấp nhận để khớp bộ base, ghi lại đây như một giới hạn của cách chấm.
 - Run Gemini của Nam (`v3_B_base_gemini_20261110T183600784007.json`: base 1.00, metric_before 0.90 của Gemini v2) chỉ để tham khảo, không nằm trong chuỗi so sánh vì khác model.
+- **Hạn chế phương pháp của cả chuỗi (tóm tắt).** Nhóm không tuân thủ hoàn toàn nguyên tắc "mỗi version một giả thuyết": v1 gộp nhiều thay đổi prompt, v2 sửa nhiều tool cùng lúc, v3 gộp 4 thay đổi và còn có thêm tool `artifact` trong `tools.yaml`. Vì vậy các mức tăng 0.65 → 0.75 → 0.95 chỉ cho biết từng version tốt hơn hay không, không tách được thay đổi nào có tác dụng. Mỗi cấu hình mới chạy một lần nên chênh lệch 1 case (0.05) chưa loại trừ được nhiễu mẫu. R10 (hồi quy ở v3) và G09 được thử xử lý ở v4 và v5 (mỗi version một rule, xem phần "Vòng v4 → v5" ở trên): R10 có khả năng đã sửa, G09 vẫn chưa. Từ v4, `system_prompt.md` ở thư mục làm việc là bản v5; bản v3 nằm trong lịch sử git và hash của nó ghi trong `version_log.csv`.
 
 Nhận xét v1 (dựa trên run JSON):
 
@@ -226,6 +240,8 @@ Hai phiên chat thật qua giao diện web (Gemini `gemini-3.8-flash`, prompt v3
 | C, lượt 1 (thiếu thông tin) | Tóm tắt bài viết này hộ mình | không gọi tool (hỏi URL bằng văn bản thường) | như trên | Không đoán URL, hỏi lại; nhưng không dùng tool `clarify` |
 | C, lượt 2 (bổ sung) | https://aipure.ai/vn/articles/how-to-create-viral-talking-baby-podcast… | `fetch(url=…)` → `format(template="sections")` | như trên | Đọc bài và tóm tắt đúng |
 
+Ba transcript phụ (OpenAI gpt-4o-mini) là các phiên thử trong lúc chạy giao diện, không dùng làm bằng chứng chính. `starter_v0/transcripts/v0_openai_web_20261110T174718676824.transcript.json` đúng là v0 (`v0+peb1c8179815b+te69bc53ed884`). Hai file `v3_openai_web_20261110T194302105068.transcript.json` và `v3_openai_web_20261110T194701705690.transcript.json` ban đầu bị gắn nhãn `v0` do nhập nhầm `--version` khi bật máy chủ, nhưng hash trong file là của v3 (`v3+p718f89bc937b+t198864b46581`, trùng ba phiên A, B, C ở trên). Nhóm đã sửa tên file và các trường `transcript_id`, `version`, `artifact_version` trong hai file này từ `v0` thành `v3` cho khớp hash; nội dung hội thoại không đổi.
+
 Nhận xét: ở phiên 2 (Gemini), agent hỏi xác nhận trước khi tìm tin, nên người dùng đồng ý khi chưa thấy nội dung. Luồng vẫn đúng yêu cầu (hỏi → đồng ý → gửi), nhưng tốt hơn là cho người dùng xem nội dung trước rồi mới hỏi.
 
 ### B5a. Required Evidence — Tool mới, unit test, UI
@@ -294,8 +310,9 @@ Chi tiết đóng góp của từng thành viên nằm trong [TEAM.md](../../TEA
 
 - **Fix nào thuộc `system_prompt.md`?** Bỏ chỉ dẫn "đoán / gửi ngay / một bước" (v1, 0.65 → 0.75); rule điền `query`; luồng xác nhận `send` và không hỏi lại sau khi user đã xác nhận (v3).
 - **Fix nào thuộc `tools.yaml`?** Quy ước `response_type` của `clarify` (v1 gọi đúng `clarify` nhưng bỏ trống `response_type`); mô tả "dùng khi / không dùng khi" và ranh giới xác nhận của `send` (v2). Nhóm không tách được đóng góp riêng của từng phần vì v2 sửa nhiều tool cùng lúc.
+- **Điểm còn thiếu ở prompt và tool declaration.** Quy tắc chọn giữa `lookup` / `social_search` / `timeline` / `papers` hiện chỉ nằm ở `tools.yaml`, chưa có rule routing tương ứng trong `system_prompt.md`. Các tool `format`, `papers`, `paper_text` chưa có phần "KHÔNG DÙNG KHI". Một số ví dụ trong mô tả tool trùng nội dung `eval_base.json`, nên điểm base có thể bị thổi phồng nhẹ (đã ghi ở `version_log.csv`, dòng v2). Nhóm chưa sửa `tools.yaml`. Với `system_prompt.md`, v4 và v5 chỉ thêm rule cho multi-turn và số lượng tool tìm kiếm, chưa thêm rule routing; đây là việc cho một version sau có run riêng.
 - **Failure nào cần review thủ công?** R08 và R14 "PASS" chỉ vì agent không gọi tool, nhưng vẫn trả lời thẳng bài toán/code thay vì từ chối; harness không phân biệt được. Hai lượt agent hỏi xác nhận/hỏi URL bằng văn bản thường thay vì tool `clarify` (phiên A lượt 4, phiên C lượt 1) vẫn đúng ý nhưng giao diện không đánh dấu "đang chờ". Một lần câu trả lời bằng tiếng Anh dù user hỏi tiếng Việt (phiên A lượt 1). Trong R12, agent xin xác nhận gửi khi chưa có nội dung cụ thể; chấm tự động coi là đúng.
-- **Nếu có thêm một vòng, nhóm sẽ thử:** (1) v4: chỉ xử lý yêu cầu ở lượt cuối của hội thoại để sửa G09 (gọi thêm `social_search`) và R10 (hồi quy: gọi `social_search` thay vì `clarify`); (2) chạy mỗi cấu hình nhiều lần để ước lượng nhiễu, vì mới có một run mỗi cấu hình; (3) thêm `.gitattributes` để hash tái lập giữa các máy; (4) thêm tool tra cứu tài khoản để xử lý tên người mơ hồ.
+- **Nếu có thêm một vòng, nhóm sẽ thử:** (1) v6: bỏ chữ `social_search` khỏi câu rule `query` của prompt (v4 và v5 chưa sửa được G09, v2 không có câu này và PASS G09); (2) chạy mỗi cấu hình 3–5 lần để ước lượng nhiễu, vì v4/v5 mới có 2–3 run mỗi cấu hình và các run trước chỉ có 1 run; (3) thêm `.gitattributes` để hash tái lập giữa các máy; (4) thêm tool tra cứu tài khoản để xử lý tên người mơ hồ.
 
 ## 8. Tài liệu tham khảo
 
