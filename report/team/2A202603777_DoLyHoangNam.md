@@ -67,5 +67,19 @@
 
 ## 5. Tự đánh giá
 
-- Hoàn thành xuất sắc toàn bộ nhiệm vụ của Checkpoint 1 và dẫn dắt tối ưu hóa Checkpoint 2 (v2 từ 75% -> 90%, v3 từ 90% -> 100% tuyệt đối).
-- Tuân thủ nghiêm ngặt phương pháp evidence-driven (đo lường bằng log thật, đặt giả thuyết khoa học, sửa đổi có kiểm soát và kiểm chứng lại bằng metric).
+- **Làm tốt:**
+  - Hoàn thành thiết lập ban đầu (CP1), giải quyết vấn đề cài đặt dependencies, chạy và xác thực run baseline `v0` hợp lệ 20/20 cases (`provider_error_cases = 0`).
+  - Đặt giả thuyết chính xác cho Version 2 (`v2`): viết lại toàn bộ `tools.yaml` với ranh giới sử dụng và quy ước tham số rõ ràng, nâng vọt độ chính xác từ 75% lên 90% trên Gemini (và 95% khi nhóm trưởng chạy lại trên OpenAI), đưa Tool Routing và Multiturn đạt tuyệt đối 100%.
+  - Tinh chỉnh `system_prompt.md` ở Version 3 (`v3`) giải quyết triệt để 2 lỗi biên cuối cùng (R03 và R12), giúp agent đạt điểm tuyệt đối 20/20 cases PASS (100% accuracy) trên bộ eval base.
+  - Tuân thủ nghiêm ngặt phương pháp evidence-driven: mọi kết luận đều đối chiếu từ run log JSON thật, kiểm tra bộ contract test `pytest` (60 passed) trước mỗi lần commit.
+
+- **Chưa tốt / bài học:**
+  - **Lệch model giữa các thành viên:** Tôi chạy chuỗi `v0 → v2 → v3` trên Gemini (`gemini-3.5-flash-lite`), trong khi nhóm trưởng chạy trên OpenAI (`gpt-4o-mini`). Dù kết quả trên cả 2 model đều cải thiện rất mạnh, việc khác provider khiến hai chuỗi số liệu không thể gộp chung thành một đường baseline duy nhất mà phải chạy đối chứng chéo. Bài học: nhóm cần chốt một provider/model cố định ngay từ bước CP1.
+  - **Gộp nhiều thay đổi trong một version:** Ở `v2`, việc sửa đồng loạt nhiều tool trong `tools.yaml` (gộp cả quy ước `response_type`, `topic/timeframe` và ranh giới `lookup` vs `social_search`) làm tăng điểm rất nhanh nhưng lại khó bóc tách định lượng xem từng thay đổi đơn lẻ đóng góp bao nhiêu phần trăm.
+  - **Hiện tượng Overfitting (tune theo bộ base):** Bản prompt `v3` tinh chỉnh để đạt 20/20 trên `eval_base.json` nhưng khi nhóm chạy thử nghiệm trên bộ `eval_group.json` (10 case mới) thì chỉ đạt 8/10, cho thấy quy tắc prompt bị phụ thuộc một phần vào các trường hợp cụ thể của bộ base mà chưa đạt tính khái quát hóa tối đa.
+  - Khác biệt định dạng kết thúc dòng (CRLF trên Windows vs LF trên Linux/macOS) giữa các máy làm hash của prompt/tools bị lệch dù nội dung văn bản giống nhau.
+
+- **Nếu làm lại:**
+  - Thống nhất duy nhất một provider/model và cấu hình file `.gitattributes` ngay từ đầu để đồng bộ hash giữa các máy trong nhóm.
+  - Tách nhỏ các giả thuyết thành từng bước vi mô (micro-iterations) để đo lường chính xác tác động của từng quy tắc.
+  - Luôn kiểm thử chéo đồng thời trên cả bộ eval base lẫn bộ eval mở rộng (hold-out set) sau mỗi lần sửa để tránh thiên lệch (overfitting).
