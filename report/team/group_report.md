@@ -242,6 +242,14 @@ Hai phiên chat thật qua giao diện web (Gemini `gemini-3.8-flash`, prompt v3
 
 Ba transcript phụ (OpenAI gpt-4o-mini) là các phiên thử trong lúc chạy giao diện, không dùng làm bằng chứng chính. `starter_v0/transcripts/v0_openai_web_20261110T174718676824.transcript.json` đúng là v0 (`v0+peb1c8179815b+te69bc53ed884`). Hai file `v3_openai_web_20261110T194302105068.transcript.json` và `v3_openai_web_20261110T194701705690.transcript.json` ban đầu bị gắn nhãn `v0` do nhập nhầm `--version` khi bật máy chủ, nhưng hash trong file là của v3 (`v3+p718f89bc937b+t198864b46581`, trùng ba phiên A, B, C ở trên). Nhóm đã sửa tên file và các trường `transcript_id`, `version`, `artifact_version` trong hai file này từ `v0` thành `v3` cho khớp hash; nội dung hội thoại không đổi.
 
+**Phiên D: gửi Telegram thành công trên OpenAI (prompt v5).** Chạy ngày 2026-11-11 sau vòng v4/v5. Tên file ban đầu ghi `v3` do `--version v3` khi bật máy chủ, nhưng hash trong file là của prompt v5 (`v5+pfe951822206a+t198864b46581`), nên đã đổi tên file và các trường `version`, `artifact_version`, `transcript_id` thành `v5`. Transcript: `starter_v0/transcripts/v5_openai_web_20261111T093140281155.transcript.json`.
+
+| Turn | User Request | Tool Calls | Version Evidence | Outcome |
+|---|---|---|---|---|
+| D, lượt 1 | Tin tức AI hôm nay có gì nổi bật? | `lookup(query="AI", topic="news", timeframe="day")` | v5 / OpenAI | Đúng tool, đúng tham số. Câu trả lời bằng tiếng Anh dù user hỏi tiếng Việt |
+| D, lượt 2 (yêu cầu gửi) | gửi qua tele cho tôi | `clarify(response_type="yes_no")` | như trên | Agent xin xác nhận, chưa gửi (`waiting_for_user`) |
+| D, lượt 3 (xác nhận) | ok | `send(confirmed=true)` | như trên | `status: sent`, tin gửi lên kênh Telegram của nhóm; transcript không chứa token |
+
 Nhận xét: ở phiên 2 (Gemini), agent hỏi xác nhận trước khi tìm tin, nên người dùng đồng ý khi chưa thấy nội dung. Luồng vẫn đúng yêu cầu (hỏi → đồng ý → gửi), nhưng tốt hơn là cho người dùng xem nội dung trước rồi mới hỏi.
 
 ### B5a. Required Evidence — Tool mới, unit test, UI
@@ -262,7 +270,7 @@ Chỉ điền nếu nhóm làm bonus (ghi riêng, tối đa 10 điểm). Tool c�
 |---|---|---|---|
 | Small Local Model | xem B7 | Không thực hiện | Chưa chạy model Ollama nào |
 | Hơn 3 tool mới (≥ 4) | — | Không đạt: nhóm chỉ viết 1 tool mới (`artifact`) | — |
-| `send` gửi thật lên Telegram sau xác nhận | `starter_v0/transcripts/v1_gemini_web_20261110T185836854159.transcript.json` (chạy qua web UI, Gemini, prompt v3-gemini `b3626215b74b`; tên file ghi `v1` do nhãn `--version` khi bật server) | Lượt 1: user yêu cầu tìm 3 tin AI rồi đăng → agent gọi `clarify` (`yes_no`) hỏi xác nhận, chưa gửi. Lượt 2: user trả lời "có" → agent gọi `send(confirmed=true)` → `status: sent`, tin hiện trên kênh private của nhóm | Chỉ gửi sau khi user xác nhận ở lượt sau (rule trong `system_prompt.md` + mô tả `send` trong `tools.yaml`); token và chat ID chỉ nằm trong `.env`, đã kiểm tra transcript không chứa token |
+| `send` gửi thật lên Telegram sau xác nhận | `starter_v0/transcripts/v5_openai_web_20261111T093140281155.transcript.json` (OpenAI gpt-4o-mini, prompt v5 `fe951822206a`, tools `198864b46581`; lượt 1 `lookup` tìm tin AI, lượt 2 "gửi qua tele cho tôi" → `clarify(yes_no)`, lượt 3 "ok" → `send(confirmed=true)` → `status: sent`). Bằng chứng thứ hai: `starter_v0/transcripts/v1_gemini_web_20261110T185836854159.transcript.json` (chạy qua web UI, Gemini, prompt v3-gemini `b3626215b74b`; tên file ghi `v1` do nhãn `--version` khi bật server) | Lượt 1: user yêu cầu tìm 3 tin AI rồi đăng → agent gọi `clarify` (`yes_no`) hỏi xác nhận, chưa gửi. Lượt 2: user trả lời "có" → agent gọi `send(confirmed=true)` → `status: sent`, tin hiện trên kênh private của nhóm | Chỉ gửi sau khi user xác nhận ở lượt sau (rule trong `system_prompt.md` + mô tả `send` trong `tools.yaml`); token và chat ID chỉ nằm trong `.env`, đã kiểm tra transcript không chứa token |
 | Test challenge (0 skipped / regression test) | `pytest` output | Không đạt: `pytest` báo 78 passed, **14 skipped** (stub TODO của tool có sẵn), chưa có regression test cho bug của tool có sẵn | — |
 
 Test challenge: số bug tìm được trong tool có sẵn (nếu có), cách sửa, và test regression tương ứng.
@@ -298,7 +306,7 @@ Lỗi đặc thù của model nhỏ (đếm từ run JSON):
 1. **Chuỗi version chạy trên hai model khác nhau.** v0 và v1 chạy OpenAI, còn v0/v2/v3 của một thành viên chạy Gemini, nên mức tăng "0.75 → 0.90" không so sánh được. Cách xử lý: chốt OpenAI gpt-4o-mini cho cả chuỗi, chạy lại v2 và v3 trên OpenAI (`runs/v2_B_base_openai_20261110T183148819703.json`, `runs/v3_B_base_openai_20261110T184941408701.json`), giữ các run Gemini làm tham khảo (`v0-gemini`, `v2-gemini`, `v3-gemini` trong `version_log.csv`).
 2. **Bản v3 gốc có dấu hiệu tune theo bộ base.** Prompt chép nguyên văn câu của case R12 và ví dụ "AI", "tuần này"; trên OpenAI đạt 20/20 ở base nhưng chỉ 8/10 ở bộ group (`runs/v3-nam_B_group_openai_20261110T184801942989.json`). Cách xử lý: viết lại prompt không chép từ eval (v3 chính thức), dùng bộ group để kiểm tra chéo.
 3. **Hash tools/prompt khác nhau giữa các máy** do khác kết thúc dòng CRLF/LF (cùng nội dung nhưng `tools_hash` `474f8a0277b2` so với `eb21b1702350`). Cách xử lý: ghi chú trong `version_log.csv`; vòng sau nên thêm `.gitattributes`.
-4. **`send` lỗi trên máy chưa cấu hình Telegram.** Trong phiên A (`v3_openai_web_20261110T191013015667`) `send(confirmed=true)` trả `RuntimeError: Missing TELEGRAM_BOT_TOKEN…`. Agent báo lỗi trung thực. Bằng chứng gửi thành công nằm ở transcript Gemini của nhóm (B5).
+4. **`send` lỗi trên máy chưa cấu hình Telegram.** Trong phiên A (`v3_openai_web_20261110T191013015667`) `send(confirmed=true)` trả `RuntimeError: Missing TELEGRAM_BOT_TOKEN…`. Agent báo lỗi trung thực. Sau đó nhóm cấu hình lại Telegram và chạy lại trên OpenAI: `v5_openai_web_20261111T093140281155` cho `send(confirmed=true)` → `status: sent` (B4, B5). Transcript Gemini vẫn giữ làm bằng chứng thứ hai.
 5. **Push bị từ chối do thành viên khác vừa đẩy commit.** Cách xử lý: `git pull --rebase` rồi push lại, không dùng force.
 6. **Bộ eval chấm khá chặt.** Harness gộp các lượt multi-turn thành một tin nhắn và chỉ chấm lượt cuối, nên chỉ kiểm tra được hành vi ở lượt cuối.
 
